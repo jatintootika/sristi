@@ -3,721 +3,507 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨ The Stars Aligned — For Sipra ✨</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Pacifico&family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+    <title>💻 Lomesh ❤️ Dishu — System Compromised 💻</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Pacifico&family=Dancing+Script:wght@400;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background: #050505; 
-            font-family: 'Fira Code', monospace; 
-            overflow: hidden; 
-            color: #0f0; 
-            transition: background 1.5s ease-in-out;
+        
+        :root {
+            --hacker-green: #00ff41;
+            --love-pink: #ff69b4;
+            --gold: #ffd700;
+            --cyan: #00ffff;
+            --bg: #020510;
+            --text: #e0e0e0;
+            --text-muted: #888;
+            --glass: rgba(255,255,255,0.04);
+            --glass-border: rgba(255,255,255,0.1);
+        }
+        
+        body {
+            font-family: 'Fira Code', monospace;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+            cursor: default;
             user-select: none;
             -webkit-user-select: none;
         }
         
-        /* Premium Background Glow */
-        body::before {
-            content: "";
-            position: fixed;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,105,180,0.05) 0%, rgba(0,0,0,0) 60%);
-            z-index: 0;
-            pointer-events: none;
-            animation: pulseBg 10s infinite alternate;
-        }
-
+        #bgCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        #matrixCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; opacity: 0.07; pointer-events: none; }
+        
         /* Scanlines */
-        body::after { 
-            content: ""; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.2) 50%), 
-                        linear-gradient(90deg, rgba(255,0,0,0.03), rgba(0,255,0,0.01), rgba(0,255,0,0.03)); 
-            z-index: 2; 
-            pointer-events: none; 
-            background-size: 100% 3px, 4px 100%; 
-            opacity: 0.8;
+        .scanlines {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 2px, transparent 2px, transparent 4px);
+            z-index: 2; pointer-events: none; opacity: 0.5;
         }
-
-        .screen { 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 20px; 
-            position: relative; 
-            z-index: 3; 
-        }
-        .hidden { display: none !important; opacity: 0; }
-
-        /* Glassmorphism Utility */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-
-        /* START OVERLAY */
-        #startOverlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 1s;
-        }
-        .lock-icon { font-size: 4em; animation: floatUpDn 2s infinite ease-in-out; margin-bottom: 20px; }
-
-        @keyframes floatUpDn {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
-
-        /* SCENE COMMON */
-        .scene { 
-            text-align: center; 
-            max-width: 800px; 
-            width: 100%; 
-            transition: opacity 1s ease;
-        }
-
-        /* TITLE STYLES */
-        .title { 
-            font-size: 2.2em; 
-            border: 2px solid; 
-            padding: 15px 30px; 
-            border-radius: 12px; 
-            margin-bottom: 25px; 
-            display: inline-block;
-            letter-spacing: 2px;
-            background: rgba(0,0,0,0.5);
-        }
-        .title.red { color: #ff3333; border-color: #ff3333; box-shadow: 0 0 15px rgba(255,51,51,0.4); }
-        .title.gold { color: #ffd700; border-color: #ffd700; background: transparent; text-shadow: 0 0 15px rgba(255,215,0,0.5); border: none; }
-        .title.pink { color: #ff69b4; border-color: #ff69b4; background: transparent; text-shadow: 0 0 15px rgba(255,105,180,0.5); border: none; font-family: 'Pacifico', cursive; letter-spacing: 4px; }
-
-        /* BUTTONS */
-        .btn { 
-            padding: 15px 40px; 
-            font-size: 1.3em; 
-            border: none; 
-            border-radius: 50px; 
-            cursor: pointer; 
-            font-family: 'Fira Code', monospace; 
-            font-weight: bold; 
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            margin: 10px; 
-            text-transform: uppercase; 
-            letter-spacing: 2px;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn::after {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(rgba(255,255,255,0.2), transparent);
-            transform: rotate(45deg); transition: 0.5s; opacity: 0;
-        }
-        .btn:hover::after { opacity: 1; transform: rotate(45deg) translate(50%, 50%); }
         
-        .btn-pink { 
-            background: linear-gradient(135deg, #ff1493, #ff69b4); 
-            color: #fff; 
-            box-shadow: 0 10px 25px rgba(255,105,180,0.5); 
+        /* Custom Cursor */
+        .cursor-terminal { width: 15px; height: 25px; background: var(--hacker-green); position: fixed; pointer-events: none; z-index: 99999; mix-blend-mode: difference; clip-path: polygon(0 0, 80% 0, 100% 20%, 100% 100%, 0 100%); }
+        
+        /* Music Player */
+        .music-player {
+            position: fixed; top: 25px; right: 25px; z-index: 100;
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(15px);
+            border: 1px solid rgba(0,255,65,0.3); border-radius: 50px;
+            padding: 10px 20px 10px 10px;
+            box-shadow: 0 0 30px rgba(0,255,65,0.1);
         }
-        .btn-pink:hover { transform: scale(1.05) translateY(-5px); box-shadow: 0 15px 35px rgba(255,105,180,0.7); }
+        .vinyl-disc {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: radial-gradient(circle, #111 30%, #222 60%, #333 100%);
+            display: flex; align-items: center; justify-content: center;
+            animation: vinylSpin 3s linear infinite paused;
+            border: 2px solid rgba(0,255,65,0.3);
+        }
+        .vinyl-disc.playing { animation-play-state: running; }
+        @keyframes vinylSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .vinyl-center { width: 12px; height: 12px; background: var(--hacker-green); border-radius: 50%; }
+        .play-btn {
+            width: 38px; height: 38px; border-radius: 50%;
+            background: rgba(0,255,65,0.1); border: 2px solid var(--hacker-green);
+            color: var(--hacker-green); cursor: pointer; font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .play-btn:hover { background: var(--hacker-green); color: #000; box-shadow: 0 0 25px var(--hacker-green); }
+        .song-info { display: flex; flex-direction: column; }
+        .song-name { font-size: 0.75rem; color: var(--hacker-green); font-weight: 700; letter-spacing: 1px; }
+        .song-artist { font-size: 0.6rem; color: #666; }
         
-        .btn-red { background: linear-gradient(135deg, #ff3333, #cc0000); color: #fff; box-shadow: 0 10px 20px rgba(255,51,51,0.4); }
-
-        /* HACKER PROGRESS BAR */
-        .terminal-box { border-left: 3px solid #0f0; padding-left: 15px; text-align: left; margin: 20px auto; max-width: 500px; }
-        .progress-bar { width: 100%; height: 12px; background: #111; border: 1px solid #0f0; border-radius: 6px; margin: 15px 0; overflow: hidden; }
-        .progress-fill { height: 100%; background: #0f0; width: 0%; box-shadow: 0 0 15px #0f0; transition: width 0.2s linear; }
-        .cursor { display: inline-block; width: 10px; height: 1.2em; background: #0f0; vertical-align: middle; animation: blink 1s step-end infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
-        /* STAR CANVAS */
-        #starCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
-
-        /* NAME CONSTELLATION */
-        .name-constellation { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin: 40px auto; }
-        .letter-star { font-family: 'Dancing Script', cursive; font-size: 5em; display: inline-block; cursor: default; transition: all 0.4s; color: #fff; }
-        .letter-star:hover { transform: scale(1.3) rotate(5deg); text-shadow: 0 0 30px #fff; }
+        .universe-container { position: relative; z-index: 3; max-width: 1000px; margin: 0 auto; padding: 20px; }
         
-        /* PREMIUM POLAROID GALLERY */
-        .polaroid-gallery { display: flex; justify-content: center; gap: 35px; flex-wrap: wrap; margin-top: 40px; }
+        /* HERO */
+        .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px 20px; }
+        .terminal-box {
+            background: rgba(0,0,0,0.8); border: 1px solid var(--hacker-green);
+            border-radius: 15px; padding: 35px 30px; text-align: left;
+            max-width: 600px; width: 100%; margin: 20px auto;
+            box-shadow: 0 0 40px rgba(0,255,65,0.1), inset 0 0 30px rgba(0,0,0,0.5);
+            position: relative; overflow: hidden;
+        }
+        .terminal-box::before {
+            content: ''; position: absolute; top: 10px; left: 15px;
+            width: 12px; height: 12px; background: #ff5f56; border-radius: 50%;
+            box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f;
+        }
+        .terminal-line { color: var(--hacker-green); font-size: 0.9rem; margin: 8px 0; opacity: 0; animation: fadeInLine 0.3s forwards; }
+        @keyframes fadeInLine { to { opacity: 1; } }
+        .terminal-prompt { color: var(--cyan); }
+        .terminal-highlight { color: var(--love-pink); font-weight: bold; }
+        .terminal-cursor { display: inline-block; width: 10px; height: 1.2em; background: var(--hacker-green); animation: blink 0.7s infinite; }
+        @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+        
+        .glitch-text {
+            font-family: 'Orbitron', sans-serif; font-size: clamp(2rem, 6vw, 4rem);
+            color: var(--love-pink); text-shadow: 3px 3px 0 #ff1493, -3px -3px 0 #00ffff;
+            animation: glitch 0.5s infinite;
+        }
+        @keyframes glitch {
+            0%,100% { transform: translate(0); }
+            20% { transform: translate(-3px, 3px); }
+            40% { transform: translate(3px, -3px); }
+            60% { transform: translate(-1px, -2px); }
+            80% { transform: translate(2px, 1px); }
+        }
+        
+        .name-reveal { font-family: 'Dancing Script', cursive; font-size: clamp(3rem, 10vw, 7rem); 
+            background: linear-gradient(45deg, #ff69b4, #ffd700, #ff69b4); background-size: 300% 300%;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: gradientShift 3s ease infinite, nameFloat 4s ease-in-out infinite;
+            margin: 25px 0;
+        }
+        @keyframes gradientShift { 0%,100%{background-position:0% 50%;} 50%{background-position:100% 50%;} }
+        @keyframes nameFloat { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-12px);} }
+        
+        .btn {
+            padding: 14px 35px; font-size: 1rem; font-family: 'Fira Code', monospace;
+            border: none; border-radius: 50px; cursor: pointer; font-weight: 700;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase; letter-spacing: 2px; margin: 10px;
+            position: relative; overflow: hidden;
+        }
+        .btn-hack {
+            background: linear-gradient(135deg, #00ff41, #00cc33);
+            color: #000; box-shadow: 0 10px 30px rgba(0,255,65,0.4);
+        }
+        .btn-hack:hover { transform: scale(1.05) translateY(-5px); box-shadow: 0 20px 50px rgba(0,255,65,0.6); }
+        .btn-love {
+            background: linear-gradient(135deg, #ff1493, #ff69b4);
+            color: #fff; box-shadow: 0 10px 30px rgba(255,105,180,0.4);
+        }
+        .btn-love:hover { transform: scale(1.05) translateY(-5px); box-shadow: 0 20px 50px rgba(255,105,180,0.6); }
+        
+        /* Polaroid 3D Gallery */
+        .polaroid-gallery { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin: 40px 0; perspective: 1000px; }
         .polaroid {
-            background: #fff; padding: 12px 12px 35px 12px; border-radius: 3px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6); text-align: center;
-            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-            width: 150px; position: relative; cursor: pointer;
+            background: #fff; padding: 15px 15px 45px 15px; border-radius: 5px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7); text-align: center;
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            width: 170px; cursor: pointer; transform-style: preserve-3d;
         }
-        /* Tape Effect */
-        .polaroid::before {
-            content: ''; position: absolute; top: -12px; left: 50%; transform: translateX(-50%) rotate(-3deg);
-            width: 60px; height: 25px; background: rgba(255, 255, 255, 0.4);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2); backdrop-filter: blur(2px); z-index: 2;
-        }
-        .polaroid:nth-child(1) { transform: rotate(-6deg) translateY(10px); }
-        .polaroid:nth-child(2) { transform: rotate(4deg); }
-        .polaroid:nth-child(3) { transform: rotate(-3deg) translateY(15px); }
-        .polaroid:hover { transform: scale(1.2) rotate(0deg) !important; box-shadow: 0 25px 50px rgba(255,105,180,0.5); z-index: 10; }
+        .polaroid:nth-child(1) { transform: rotate(-8deg) translateY(15px); }
+        .polaroid:nth-child(2) { transform: rotate(5deg) translateY(-10px); }
+        .polaroid:nth-child(3) { transform: rotate(-4deg) translateY(20px); }
+        .polaroid:hover { transform: rotate(0deg) translateY(-20px) scale(1.15) rotateY(10deg) !important; 
+            box-shadow: 0 30px 70px rgba(255,105,180,0.6); z-index: 10; }
         .polaroid-img {
-            width: 100%; height: 110px; border-radius: 2px; display: flex; align-items: center; justify-content: center;
-            font-size: 3.5em; margin-bottom: 10px;
-            background: linear-gradient(45deg, #1a1a1a, #333); /* Dark aesthetic */
+            width: 100%; height: 130px; border-radius: 3px; display: flex; align-items: center; justify-content: center;
+            font-size: 3.5em; margin-bottom: 12px;
         }
-        .p1 { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); }
-        .p2 { background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%); }
-        .p3 { background: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%); }
-        .polaroid p { color: #222; font-family: 'Dancing Script', cursive; font-size: 1.3em; font-weight: bold; }
-
-        /* TIMELINE (GLASSMORPHISM) */
-        .timeline-container { position: relative; max-width: 750px; margin: 20px auto; padding: 20px; max-height: 60vh; overflow-y: auto; scrollbar-width: none; }
-        .timeline-container::-webkit-scrollbar { display: none; }
-        .timeline-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: linear-gradient(to bottom, transparent, #ff69b4, #ffd700, #ff69b4, transparent); transform: translateX(-50%); box-shadow: 0 0 15px rgba(255,105,180,0.6); border-radius: 2px; }
-        .timeline-item { display: flex; align-items: center; margin: 40px 0; position: relative; opacity: 0; transform: translateY(40px); transition: all 0.8s ease; }
-        .timeline-item.visible { opacity: 1; transform: translateY(0); }
-        .timeline-item.left { flex-direction: row; }
-        .timeline-item.right { flex-direction: row-reverse; }
-        .timeline-item.center { justify-content: center; width: 100%; }
+        .p-img-1 { background: linear-gradient(135deg, #ff9a9e, #fecfef); }
+        .p-img-2 { background: linear-gradient(120deg, #a1c4fd, #c2e9fb); }
+        .p-img-3 { background: linear-gradient(to top, #cfd9df, #e2ebf0); }
+        .polaroid p { color: #222; font-family: 'Dancing Script', cursive; font-size: 1.4em; font-weight: 700; }
         
-        .timeline-dot {
-            width: 55px; height: 55px; min-width: 55px; border-radius: 50%;
-            background: #111; border: 3px solid #ff69b4; display: flex; align-items: center; justify-content: center;
-            font-size: 1.6em; z-index: 2; box-shadow: 0 0 20px rgba(255,105,180,0.6); flex-shrink: 0;
-            transition: 0.3s;
+        /* Timeline */
+        .timeline-section { padding: 60px 0; }
+        .timeline { position: relative; max-width: 700px; margin: 0 auto; padding: 20px; }
+        .timeline-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 3px; 
+            background: linear-gradient(to bottom, transparent, var(--love-pink), var(--gold), var(--love-pink), transparent);
+            transform: translateX(-50%); box-shadow: 0 0 15px rgba(255,105,180,0.5); border-radius: 2px; }
+        .tl-item { display: flex; align-items: center; margin: 50px 0; position: relative; opacity: 0; transform: translateY(30px); transition: all 0.8s ease; }
+        .tl-item.visible { opacity: 1; transform: translateY(0); }
+        .tl-item:nth-child(odd) { flex-direction: row; }
+        .tl-item:nth-child(even) { flex-direction: row-reverse; }
+        .tl-dot { width: 55px; height: 55px; min-width: 55px; border-radius: 50%;
+            background: #111; border: 3px solid var(--love-pink); display: flex; align-items: center; justify-content: center;
+            font-size: 1.5em; z-index: 2; box-shadow: 0 0 25px rgba(255,105,180,0.5); }
+        .tl-content { padding: 20px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; max-width: 45%; margin: 0 25px; }
+        .tl-item:nth-child(even) .tl-content { text-align: right; }
+        .tl-content h3 { color: var(--gold); font-family: 'Dancing Script', cursive; font-size: 1.6em; margin-bottom: 8px; }
+        .tl-content p { color: #ccc; font-size: 0.85rem; line-height: 1.7; }
+        
+        /* Proposal Overlay */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 98; backdrop-filter: blur(15px);
+            transition: opacity 0.5s;
         }
-        .timeline-item:hover .timeline-dot { transform: scale(1.2) rotate(10deg); background: #ff69b4; border-color: #fff; }
-        
-        .timeline-content { padding: 20px 25px; max-width: 45%; margin: 0 25px; transition: 0.4s; text-align: left; }
-        .timeline-item.right .timeline-content { text-align: right; }
-        .timeline-content:hover { transform: scale(1.03) translateY(-5px); border-color: rgba(255,105,180,0.6); box-shadow: 0 15px 35px rgba(255,105,180,0.2); }
-        .timeline-content h3 { color: #ffd700; font-family: 'Dancing Script', cursive; font-size: 1.6em; margin-bottom: 8px; letter-spacing: 1px; }
-        .timeline-content p { color: #eaeaea; font-size: 1em; line-height: 1.6; font-family: 'Fira Code', monospace; }
-        
-        /* OVERLAY & PROPOSAL CARD */
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 98; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); transition: opacity 0.5s; }
-        .proposal-card { 
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 99; text-align: center; 
-            padding: 50px 40px; max-width: 600px; width: 90%; 
-            border: 1px solid rgba(255,105,180,0.4);
-            box-shadow: 0 25px 60px rgba(255,105,180,0.3), inset 0 0 20px rgba(255,105,180,0.1); 
-            animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        .proposal-card {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 99;
+            text-align: center; padding: 50px 40px; max-width: 550px; width: 90%;
+            background: rgba(10,0,20,0.95); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,105,180,0.3);
+            border-radius: 30px;
+            box-shadow: 0 30px 80px rgba(255,105,180,0.3), 0 0 100px rgba(255,105,180,0.1);
         }
-        .proposal-card h1 { font-family: 'Pacifico', cursive; color: #ff69b4; font-size: 3em; text-shadow: 0 0 20px rgba(255,105,180,0.6); margin-bottom: 10px; }
-        .proposal-card p { color: #fff; font-family: 'Fira Code', monospace; font-size: 1.2em; margin: 15px 0; line-height: 1.5; }
-        .big-heart { font-size: 6em; animation: heartbeat 1.2s infinite; display: inline-block; filter: drop-shadow(0 0 20px rgba(255,20,147,0.8)); margin-bottom: 10px; }
+        .proposal-card h1 { font-family: 'Pacifico', cursive; color: var(--love-pink); font-size: 2.8em; 
+            text-shadow: 0 0 25px rgba(255,105,180,0.6); }
+        .proposal-card p { color: #ddd; font-size: 1.1em; margin: 15px 0; }
+        .big-heart { font-size: 5em; animation: heartbeat 1s infinite; display: inline-block; 
+            filter: drop-shadow(0 0 30px rgba(255,20,147,0.8)); }
+        @keyframes heartbeat { 0%,100%{transform:scale(1);} 15%{transform:scale(1.3);} 30%{transform:scale(1);} 45%{transform:scale(1.2);} 60%{transform:scale(1);} }
+        .no-btn { position: relative; transition: all 0.15s ease-out; }
         
-        @keyframes heartbeat { 0%,100% { transform: scale(1); } 15% { transform: scale(1.25); } 30% { transform: scale(1); } 45% { transform: scale(1.15); } 60% { transform: scale(1); } }
-        .no-btn-move { position: relative; transition: all 0.2s ease-out; }
-
-        /* CELEBRATION */
-        .celebration-card { 
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 100; text-align: center; 
-            padding: 50px; border-radius: 30px; border: 1px solid rgba(255,215,0,0.3); 
-            box-shadow: 0 0 80px rgba(255,215,0,0.2); animation: popIn 1s ease; 
-        }
-        .celebration-card h1 { font-family: 'Pacifico', cursive; font-size: 4.5em; color: #ffd700; text-shadow: 0 0 40px #ffd700; margin: 10px 0; }
+        /* Celebration */
+        .celebration { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 100; 
+            text-align: center; padding: 50px; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,215,0,0.3); border-radius: 30px;
+            box-shadow: 0 0 100px rgba(255,215,0,0.3); }
+        .celebration h1 { font-family: 'Pacifico', cursive; font-size: 4em; color: var(--gold); 
+            text-shadow: 0 0 50px var(--gold); }
         
-        .typewriter-text { border-right: 2px solid #ff69b4; white-space: pre-wrap; display: inline; }
-
-        /* MOBILE RESPONSIVE */
-        @media (max-width: 600px) {
-            .title { font-size: 1.3em; padding: 12px; letter-spacing: 1px; }
-            .letter-star { font-size: 3.5em; margin: 0 2px; }
-            .polaroid { width: 110px; padding: 8px 8px 25px 8px; }
-            .polaroid-img { height: 80px; font-size: 2.5em; }
-            .polaroid p { font-size: 1em; }
-            .polaroid-gallery { gap: 15px; }
-            .timeline-line { left: 25px; }
-            .timeline-item.left, .timeline-item.right { flex-direction: column; align-items: flex-start; padding-left: 60px; margin: 30px 0; }
-            .timeline-dot { position: absolute; left: 0; width: 45px; height: 45px; min-width: 45px; font-size: 1.2em; }
-            .timeline-content { max-width: 100%; margin: 0; text-align: left !important; padding: 15px; }
-            .proposal-card { padding: 30px 20px; }
+        @media (max-width: 768px) {
+            .terminal-box { padding: 20px; }
+            .polaroid { width: 120px; padding: 10px 10px 30px 10px; }
+            .polaroid-img { height: 90px; font-size: 2.5em; }
+            .tl-line { left: 20px; }
+            .tl-item:nth-child(odd), .tl-item:nth-child(even) { flex-direction: column; align-items: flex-start; padding-left: 50px; }
+            .tl-dot { position: absolute; left: 0; width: 40px; height: 40px; min-width: 40px; font-size: 1.1em; }
+            .tl-content { max-width: 100%; margin: 0; text-align: left !important; }
+            .proposal-card { padding: 25px; }
             .proposal-card h1 { font-size: 2em; }
-            .proposal-card p { font-size: 1em; }
-            .big-heart { font-size: 4.5em; }
-            .btn { font-size: 1em; padding: 12px 25px; }
-            .celebration-card { padding: 25px; width: 95%; }
-            .celebration-card h1 { font-size: 2.5em; }
         }
     </style>
 </head>
 <body>
-    <audio id="bgMusic" loop>
-        <source src="https://www.chosic.com/wp-content/uploads/2021/04/And-So-It-Begins-Inspired-By-Crush-Music.mp3" type="audio/mpeg">
+    
+    <!-- 3D Canvas -->
+    <canvas id="bgCanvas"></canvas>
+    <!-- Matrix Rain -->
+    <canvas id="matrixCanvas"></canvas>
+    <!-- Scanlines -->
+    <div class="scanlines"></div>
+    
+    <!-- Terminal Cursor -->
+    <div class="cursor-terminal" id="termCursor"></div>
+    
+    <!-- Music Player -->
+    <div class="music-player">
+        <div class="vinyl-disc" id="vinylDisc"><div class="vinyl-center"></div></div>
+        <button class="play-btn" id="musicToggle"><i class="fas fa-play"></i></button>
+        <div class="song-info"><span class="song-name">🎵 Bairan</span><span class="song-artist">Nand Jhari</span></div>
+    </div>
+    
+    <audio id="bgMusic" loop autoplay muted playsinline preload="auto">
+        <source src="assets/music/bairan.mp3" type="audio/mpeg">
     </audio>
 
-    <div id="startOverlay">
-        <div class="lock-icon">🔒</div>
-        <h2 style="font-family:'Pacifico',cursive; color:#ff69b4; font-size:2.5em; margin-bottom:20px;">Secured Network</h2>
-        <p style="color:#aaa; font-size:1.1em; margin-bottom:30px;">Encrypted connection for Sipra only.</p>
-        <button class="btn btn-pink" onclick="startExperience()">Tap to Unlock ❤️</button>
-    </div>
-
-    <div class="screen hidden" id="mainScreen">
+    <div class="universe-container">
         
-        <div class="scene" id="scene1">
-            <div class="title red">SYSTEM OVERRIDE</div>
-            <div class="terminal-box">
-                <p style="color:cyan; margin-bottom:8px;">> TARGET: <span style="color:#ff3333; font-weight:bold;">SIPRA'S HEART</span></p>
-                <p style="color:cyan; margin-bottom:8px;">> MISSION: <span style="color:#ffd700;">PROJECT FOREVER 💫</span></p>
-                <p style="color:#888; font-size:0.9em; margin-bottom:15px;">> ENCRYPTED COMM: JATIN_PROTOCOL_V1</p>
-                
-                <div class="progress-bar"><div class="progress-fill" id="progress1"></div></div>
-                
-                <p style="color:#0f0; margin-top:10px;">
-                    <span id="typingStatus">Waiting for connection...</span><span class="cursor"></span>
-                </p>
+        <!-- HERO: Terminal Hack -->
+        <section class="hero" id="heroSection">
+            <div class="terminal-box" id="terminalBox">
+                <div style="padding-top:20px;"></div>
+                <div class="terminal-line" style="animation-delay:0.3s;"><span class="terminal-prompt">root@lomesh:~$</span> ./find_love.sh</div>
+                <div class="terminal-line" style="animation-delay:0.8s;">Scanning universe for <span class="terminal-highlight">Dishu</span>...</div>
+                <div class="terminal-line" style="animation-delay:1.4s;">████████████████████ 100% — TARGET FOUND!</div>
+                <div class="terminal-line" style="animation-delay:2s;"><span class="terminal-prompt">root@lomesh:~$</span> cat /heart/feelings.txt</div>
+                <div class="terminal-line" style="animation-delay:2.5s;">STATUS: <span class="terminal-highlight">HOPELESSLY IN LOVE</span> 💘</div>
+                <div class="terminal-line" style="animation-delay:3s;"><span class="terminal-prompt">root@lomesh:~$</span> <span class="terminal-cursor"></span></div>
             </div>
-        </div>
-
-        <div class="scene hidden" id="scene2">
-            <canvas id="starCanvas"></canvas>
             
-            <div class="title pink">The Universe Conspired...</div>
-            
-            <div style="position:relative; z-index:3;">
-                <p style="color:#ddd; font-size:1.3em; margin-bottom:10px; font-style:italic;">Fate wrote our code long before we met.</p>
-                
-                <div class="name-constellation">
-                    <span class="letter-star" style="color:#ffb7b2; text-shadow: 0 0 20px #ffb7b2;">S</span>
-                    <span class="letter-star" style="color:#ffdac1; text-shadow: 0 0 20px #ffdac1; transition-delay:0.1s;">I</span>
-                    <span class="letter-star" style="color:#e2f0cb; text-shadow: 0 0 20px #e2f0cb; transition-delay:0.2s;">P</span>
-                    <span class="letter-star" style="color:#b5ead7; text-shadow: 0 0 20px #b5ead7; transition-delay:0.3s;">R</span>
-                    <span class="letter-star" style="color:#c7ceea; text-shadow: 0 0 20px #c7ceea; transition-delay:0.4s;">A</span>
-                </div>
-                
-                <p style="color:#fff; font-size:1.2em; margin-top:20px; font-weight:bold;">
-                    Every star aligned just to bring <span style="color:#ff69b4; font-size:1.2em;">YOU</span> into my timeline.
-                </p>
+            <div id="heroReveal" style="display:none;">
+                <h2 class="glitch-text">TARGET LOCKED</h2>
+                <h1 class="name-reveal">Dishu</h1>
+                <p style="font-size:1.3rem;color:#ddd;margin:15px 0;font-style:italic;">The most beautiful vulnerability in my system 💕</p>
                 
                 <div class="polaroid-gallery">
-                    <div class="polaroid">
-                        <div class="polaroid-img p1">👀</div>
-                        <p>The Glance</p>
-                    </div>
-                    <div class="polaroid">
-                        <div class="polaroid-img p2">☕</div>
-                        <p>The Spark</p>
-                    </div>
-                    <div class="polaroid">
-                        <div class="polaroid-img p3">🌙</div>
-                        <p>The Nights</p>
-                    </div>
+                    <div class="polaroid"><div class="polaroid-img p-img-1">💫</div><p>First Sight</p></div>
+                    <div class="polaroid"><div class="polaroid-img p-img-2">💝</div><p>Heart Hack</p></div>
+                    <div class="polaroid"><div class="polaroid-img p-img-3">🌙</div><p>Dream Girl</p></div>
                 </div>
             </div>
-        </div>
-
-        <div class="scene hidden" id="scene3">
-            <div class="title red glitch-text" style="font-size:3em; border:none; background:transparent;">⚠️ FATAL ERROR ⚠️</div>
-            <div class="glass-panel" style="padding:40px; margin-top:20px;">
-                <p style="color:#ff3333; font-size:1.6em; margin-bottom:15px; font-weight:bold;">HACKER SYSTEM... <span style="font-size:1.5em; color:#ff69b4;">COMPROMISED!</span></p>
-                <p style="color:cyan; font-size:1.2em;">DIAGNOSTIC: <span style="color:#fff;">FELL HOPELESSLY IN LOVE WITH TARGET.</span></p>
-                
-                <div class="progress-bar" style="width:80%; margin:25px auto;"><div class="progress-fill" id="progress3" style="background:linear-gradient(90deg,#ff1493,#ffd700);"></div></div>
-                
-                <p id="scanResult" style="color:#ffd700; font-size:1.5em; opacity:0; transition:0.5s; font-family:'Pacifico',cursive; letter-spacing:2px;">RESULT: TRUE LOVE DETECTED 💖</p>
-            </div>
-        </div>
-
-        <div class="scene hidden" id="scene4">
-            <div class="title gold">Our Beautiful Journey</div>
             
-            <div class="timeline-container" id="timelineScroll">
+            <button class="btn btn-hack" id="continueBtn" style="display:none;" onclick="showTimeline()">
+                ⚡ CONTINUE MISSION ⚡
+            </button>
+        </section>
+        
+        <!-- TIMELINE -->
+        <section class="timeline-section" id="timelineSection" style="display:none;">
+            <h2 style="text-align:center;font-family:'Orbitron',sans-serif;color:var(--hacker-green);letter-spacing:3px;margin-bottom:40px;">
+                📜 LOVE_LOG.TXT
+            </h2>
+            <div class="timeline" id="timelineScroll">
                 <div class="timeline-line"></div>
                 
-                <div class="timeline-item left">
-                    <div class="timeline-dot">👀</div>
-                    <div class="glass-panel timeline-content">
-                        <h3>Chapter 1: The Crash</h3>
-                        <p>Us din tumhe dekha aur mera pura system hang ho gaya! Duniya slow-mo mein thi. Sabse beautiful "404 Error" — mera dimag blank tha, par dil connect ho gaya! 💘</p>
-                    </div>
-                </div>
+                <div class="tl-item"><div class="tl-dot">👀</div>
+                    <div class="tl-content"><h3>First Connection</h3>
+                    <p>Jab pehli baar Dishu ko dekha, mera poora system crash ho gaya. Duniya slow-mo mein thi, sabse beautiful "system error" tha! 💘</p></div></div>
                 
-                <div class="timeline-item right">
-                    <div class="timeline-dot">💬</div>
-                    <div class="glass-panel timeline-content">
-                        <h3>Chapter 2: The Ping</h3>
-                        <p>Pehli baar tumhari aawaz suni toh laga jaise koi pyari si melody baj rahi ho. Tumhari har baat meri favorite notification ban gayi. 🎵</p>
-                    </div>
-                </div>
+                <div class="tl-item"><div class="tl-dot">💬</div>
+                    <div class="tl-content"><h3>Voice Protocol</h3>
+                    <p>Pehli baar Dishu ki aawaz suni toh jaise koi pyari si algorithm mere dil mein loop chalane lagi. Har baat ek notification ban gayi! 🎵</p></div></div>
                 
-                <div class="timeline-item left">
-                    <div class="timeline-dot">☕</div>
-                    <div class="glass-panel timeline-content">
-                        <h3>Chapter 3: Cache Memory</h3>
-                        <p>Wo coffee aur baatein... Coffee se zyada meethi toh tumhari smile thi! Wo moments meri permanent memory ban gaye jo kabhi delete nahi ho sakte. ☕💕</p>
-                    </div>
-                </div>
+                <div class="tl-item"><div class="tl-dot">☕</div>
+                    <div class="tl-content"><h3>Coffee Debug</h3>
+                    <p>Wo coffee aur baatein... Coffee se zyada meethi Dishu ki smile thi! Wo moments permanently cached hain, kabhi delete nahi honge! ☕💕</p></div></div>
                 
-                <div class="timeline-item right">
-                    <div class="timeline-dot">🌙</div>
-                    <div class="glass-panel timeline-content">
-                        <h3>Chapter 4: Sleepless Loops</h3>
-                        <p>Raaton ki neend udh gayi, baatein subah tak chali... Tumhare saath time ka logic hi fail ho jata hai. Har raat ek magical loop ban gayi. ⏰✨</p>
-                    </div>
-                </div>
+                <div class="tl-item"><div class="tl-dot">🌙</div>
+                    <div class="tl-content"><h3>Night Renders</h3>
+                    <p>Raaton ki neend udh gayi, baatein subah tak chali... Dishu ke saath time ka logic hi fail ho jata hai. Har raat ek beautiful infinite loop! 🌌✨</p></div></div>
                 
-                <div class="timeline-item center" style="margin-top:60px;">
-                    <div class="timeline-dot" style="font-size:2.5em; width:70px; height:70px; border-color:#ffd700; background:rgba(255,215,0,0.1);">❓</div>
-                </div>
+                <div class="tl-item" style="justify-content:center;"><div class="tl-dot" style="width:70px;height:70px;font-size:2.5em;border-color:var(--gold);">❓</div></div>
             </div>
             
-            <button class="btn btn-pink" onclick="showProposal()" style="margin-top:30px; z-index:10; position:relative; font-size:1.1em;">
-                📖 UNLOCK FINAL CHAPTER 💝
-            </button>
-        </div>
-
-        <div class="overlay hidden" id="overlay"></div>
-        <div class="proposal-card glass-panel hidden" id="proposalCard">
-            <div class="big-heart">💖</div>
-            <h1>The Honest Truth...</h1>
-            <p style="color:#ffb7b2; font-style:italic;">This whole "Hack" was just an excuse...</p>
-            <p>Because I needed the absolute perfect way to tell you...</p>
-            
-            <div style="margin: 30px 0; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 15px; border: 1px solid rgba(255,215,0,0.3);">
-                <p style="font-size:2.5em; font-family:'Pacifico',cursive; color:#ffd700; margin:0; text-shadow:0 0 20px rgba(255,215,0,0.8);">
-                    I LOVE YOU, SIPRA! 🌹
-                </p>
+            <div style="text-align:center;margin-top:30px;">
+                <button class="btn btn-love" onclick="showProposal()">💝 UNLOCK FINAL CHAPTER 💝</button>
             </div>
-            
-            <p>You are the most beautiful bug in my system,</p>
-            <p style="margin-bottom:25px;">And I never, ever want to fix it! 💕</p>
-            
-            <p style="font-size:2.2em; font-family:'Dancing Script',cursive; color:#ff69b4; margin-bottom: 30px; text-shadow:0 0 10px rgba(255,105,180,0.5);">
-                Will You Be My Forever? 💍
+        </section>
+        
+    </div>
+    
+    <!-- Overlay + Proposal -->
+    <div class="overlay" id="overlay" style="display:none;"></div>
+    <div class="proposal-card" id="proposalCard" style="display:none;">
+        <div class="big-heart">💖</div>
+        <h1>The Ultimate Truth...</h1>
+        <p style="color:#ffb7b2;">This whole "system hack" was just an excuse...</p>
+        <p>Because Lomesh needed the absolute perfect way to tell you...</p>
+        
+        <div style="margin:25px 0;padding:20px;background:rgba(0,0,0,0.4);border-radius:15px;border:1px solid rgba(255,215,0,0.3);">
+            <p style="font-size:2.5em;font-family:'Pacifico',cursive;color:var(--gold);text-shadow:0 0 25px var(--gold);">
+                I LOVE YOU, DISHU! 🌹
             </p>
-            
-            <div style="display:flex; justify-content:center; align-items:center; gap:20px; flex-wrap:wrap;">
-                <button class="btn btn-pink" onclick="sheSaidYes()" style="font-size:1.5em; padding:15px 50px;">YES! 💕</button>
-                <button class="btn btn-red no-btn-move" id="noPropBtn" onmouseover="moveNoBtn()" onclick="moveNoBtn()">NO 😭</button>
-            </div>
+        </div>
+        
+        <p>You are the most beautiful bug in my system,</p>
+        <p style="margin-bottom:20px;">And Lomesh never, ever wants to fix it! 💕</p>
+        
+        <p style="font-size:2em;font-family:'Dancing Script',cursive;color:var(--love-pink);text-shadow:0 0 10px var(--love-pink);margin-bottom:25px;">
+            Will You Be My Forever? 💍
+        </p>
+        
+        <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;">
+            <button class="btn btn-love" onclick="sheSaidYes()" style="font-size:1.4em;padding:15px 45px;">YES! 💕</button>
+            <button class="btn btn-hack no-btn" id="noBtn" onmouseover="moveNo()" onclick="moveNo()" style="background:linear-gradient(135deg,#ff3333,#cc0000);color:#fff;box-shadow:0 10px 30px rgba(255,0,0,0.4);">NO 😭</button>
         </div>
     </div>
 
     <script>
-        const delay = ms => new Promise(r => setTimeout(r, ms));
-
-        // ==================== START EXPERIENCE ====================
-        function startExperience() {
-            document.getElementById('startOverlay').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('startOverlay').style.display = 'none';
-                document.getElementById('mainScreen').classList.remove('hidden');
-                
-                // Start Audio safely
-                const music = document.getElementById('bgMusic');
-                music.volume = 0.4;
-                music.play().catch(e => console.log("Audio play failed:", e));
-                
-                startFilm();
-            }, 800);
+        // ==================== 3D BACKGROUND ====================
+        const bgCanvas=document.getElementById('bgCanvas');
+        const renderer=new THREE.WebGLRenderer({canvas:bgCanvas,antialias:true,alpha:true});
+        renderer.setSize(window.innerWidth,window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+        const scene=new THREE.Scene();
+        const camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+        camera.position.z=35;
+        
+        // Lights
+        scene.add(new THREE.AmbientLight(0xffffff,0.4));
+        const l1=new THREE.PointLight(0xff69b4,0.6,80);l1.position.set(10,10,25);scene.add(l1);
+        const l2=new THREE.PointLight(0x00ff41,0.4,80);l2.position.set(-10,-5,20);scene.add(l2);
+        
+        // Hearts
+        const hearts=[];
+        for(let i=0;i<40;i++){
+            const sh=new THREE.Shape();
+            sh.moveTo(0,0.5);sh.bezierCurveTo(0,1.5,-2,1.5,-2,0.5);sh.bezierCurveTo(-2,-1,0,-1.5,0,-2.5);sh.bezierCurveTo(0,-1.5,2,-1,2,0.5);sh.bezierCurveTo(2,1.5,0,1.5,0,0.5);
+            const g=new THREE.ExtrudeGeometry(sh,{depth:0.2,bevelEnabled:true,bevelThickness:0.1,bevelSize:0.1});
+            const m=new THREE.MeshPhongMaterial({color:new THREE.Color().setHSL(0.9+Math.random()*0.1,0.8,0.6+Math.random()*0.3),emissive:new THREE.Color().setHSL(0.9,0.4,0.15),shininess:120,transparent:true,opacity:0.5+Math.random()*0.4});
+            const h=new THREE.Mesh(g,m);
+            h.position.set((Math.random()-0.5)*45,(Math.random()-0.5)*45,(Math.random()-0.5)*18);
+            h.rotation.set(Math.random()*Math.PI*2,Math.random()*Math.PI*2,Math.random()*Math.PI*2);
+            const s=0.2+Math.random()*1.5;h.scale.set(s,s,s);
+            h.userData={rx:(Math.random()-0.5)*0.008,ry:(Math.random()-0.5)*0.008,rz:(Math.random()-0.5)*0.008,fs:0.001+Math.random()*0.004,fa:0.5+Math.random()*2,iy:h.position.y,ph:Math.random()*Math.PI*2};
+            hearts.push(h);scene.add(h);
         }
-
-        // ==================== TYPEWRITER EFFECT ====================
-        async function typeText(elementId, text, speed = 50) {
-            const el = document.getElementById(elementId);
-            el.innerHTML = '';
-            for (let i = 0; i < text.length; i++) {
-                el.innerHTML += text.charAt(i);
-                await delay(speed);
-            }
+        
+        // Rings
+        for(let i=0;i<15;i++){
+            const g=new THREE.TorusGeometry(0.6+Math.random()*1,0.06,16,32);
+            const m=new THREE.MeshPhongMaterial({color:0xffd700,emissive:0xffd700,emissiveIntensity:0.3,shininess:200,transparent:true,opacity:0.5+Math.random()*0.4});
+            const r=new THREE.Mesh(g,m);
+            r.position.set((Math.random()-0.5)*40,(Math.random()-0.5)*40,(Math.random()-0.5)*15);
+            r.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI);
+            r.userData={rx:(Math.random()-0.5)*0.01,ry:(Math.random()-0.5)*0.01,rz:(Math.random()-0.5)*0.01,fs:0.001+Math.random()*0.003,fa:0.5+Math.random()*1.5,iy:r.position.y,ph:Math.random()*Math.PI*2};
+            scene.add(r);
         }
-
-        // ==================== SCENE 1: PROGRESS ANIMATION ====================
-        async function runScene1() {
-            const progress = document.getElementById('progress1');
-            const statusId = 'typingStatus';
-            
-            const steps = [
-                { w: 15, t: '> Establishing secure socket to Sipra_Heart...' },
-                { w: 30, t: '> Bypassing emotional firewalls...' },
-                { w: 50, t: '> Decrypting beautiful memories...' },
-                { w: 75, t: '> Compiling love_letter.exe...' },
-                { w: 100, t: '> ACCESS GRANTED! Welcome Jatin.' }
-            ];
-            
-            for (let step of steps) {
-                progress.style.width = step.w + '%';
-                await typeText(statusId, step.t, 30);
-                await delay(600);
-            }
-            
-            await delay(1000);
-            document.getElementById('scene1').style.opacity = '0';
-            await delay(1000);
-            document.getElementById('scene1').classList.add('hidden');
-            document.getElementById('scene2').classList.remove('hidden');
-            createStars();
-            
-            // Stagger polaroid animations
-            const polaroids = document.querySelectorAll('.polaroid');
-            polaroids.forEach((p, i) => {
-                p.style.opacity = '0';
-                p.style.transform = 'translateY(50px)';
-                setTimeout(() => {
-                    p.style.transition = 'all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                    p.style.opacity = '1';
-                    // Restore rotation
-                    if(i===0) p.style.transform = 'rotate(-6deg) translateY(10px)';
-                    if(i===1) p.style.transform = 'rotate(4deg)';
-                    if(i===2) p.style.transform = 'rotate(-3deg) translateY(15px)';
-                }, 3500 + (i * 400));
+        
+        // Stars
+        const sg=new THREE.BufferGeometry();const sc=500;const sp=new Float32Array(sc*3);
+        for(let i=0;i<sc*3;i+=3){sp[i]=(Math.random()-0.5)*60;sp[i+1]=(Math.random()-0.5)*60;sp[i+2]=(Math.random()-0.5)*30;}
+        sg.setAttribute('position',new THREE.BufferAttribute(sp,3));
+        const st=new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.12,transparent:true,blending:THREE.AdditiveBlending}));
+        scene.add(st);
+        
+        let mx=0,my=0;
+        document.addEventListener('mousemove',(e)=>{mx=(e.clientX/window.innerWidth-0.5)*2;my=(e.clientY/window.innerHeight-0.5)*2;});
+        
+        function animate3D(){
+            requestAnimationFrame(animate3D);
+            const t=Date.now()*0.001;
+            scene.children.forEach(o=>{if(o.userData&&o.userData.fs){o.rotation.x+=o.userData.rx||0;o.rotation.y+=o.userData.ry||0;o.rotation.z+=o.userData.rz||0;if(o.userData.iy!==undefined)o.position.y=o.userData.iy+Math.sin(t*o.userData.fs+o.userData.ph)*o.userData.fa;}});
+            st.rotation.x+=0.00005;st.rotation.y+=0.0001;
+            camera.position.x+=(mx*3-camera.position.x)*0.02;camera.position.y+=(-my*2-camera.position.y)*0.02;camera.lookAt(0,0,0);
+            l1.position.x=Math.sin(t*0.3)*10;l1.position.y=Math.cos(t*0.25)*10;
+            l2.position.x=Math.cos(t*0.35)*-8;l2.position.y=Math.sin(t*0.3)*-8;
+            renderer.render(scene,camera);
+        }
+        animate3D();
+        
+        // ==================== MATRIX RAIN ====================
+        const mxCanvas=document.getElementById('matrixCanvas');mxCanvas.width=window.innerWidth;mxCanvas.height=window.innerHeight;
+        const mctx=mxCanvas.getContext('2d');
+        const chars='01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const fontSize=14;const columns=Math.floor(mxCanvas.width/fontSize);
+        const drops=Array(columns).fill(1);
+        function drawMatrix(){mctx.fillStyle='rgba(0,0,0,0.05)';mctx.fillRect(0,0,mxCanvas.width,mxCanvas.height);mctx.fillStyle='#0f0';mctx.font=fontSize+'px monospace';for(let i=0;i<drops.length;i++){const text=chars[Math.floor(Math.random()*chars.length)];mctx.fillText(text,i*fontSize,drops[i]*fontSize);if(drops[i]*fontSize>mxCanvas.height&&Math.random()>0.975)drops[i]=0;drops[i]++;}requestAnimationFrame(drawMatrix);}
+        drawMatrix();
+        
+        // ==================== TERMINAL CURSOR ====================
+        const tc=document.getElementById('termCursor');
+        document.addEventListener('mousemove',(e)=>{tc.style.left=e.clientX-5+'px';tc.style.top=e.clientY-10+'px';});
+        
+        // ==================== MUSIC ====================
+        const audio=document.getElementById('bgMusic');const mt=document.getElementById('musicToggle');const vd=document.getElementById('vinylDisc');
+        if(audio&&mt){let p=true;mt.addEventListener('click',()=>{if(p){audio.pause();mt.innerHTML='<i class="fas fa-play"></i>';vd.classList.remove('playing');}else{audio.muted=false;audio.play();mt.innerHTML='<i class="fas fa-pause"></i>';vd.classList.add('playing');}p=!p;});}
+        
+        // Autoplay
+        (function(){if(!audio)return;let u=false;function um(){if(!u&&audio){audio.muted=false;audio.play().then(()=>{u=true;vd.classList.add('playing');mt.innerHTML='<i class="fas fa-pause"></i>';}).catch(()=>{});}}['click','touchstart','scroll','keydown'].forEach(e=>document.addEventListener(e,um,{once:true}));setTimeout(()=>{if(!u){audio.muted=false;audio.play();vd.classList.add('playing');mt.innerHTML='<i class="fas fa-pause"></i>';}},3000);})();
+        
+        // ==================== SCENE TRANSITIONS ====================
+        setTimeout(()=>{
+            document.getElementById('heroReveal').style.display='block';
+            document.getElementById('continueBtn').style.display='inline-block';
+            document.getElementById('terminalBox').style.opacity='0.4';
+        },4000);
+        
+        function showTimeline(){
+            document.getElementById('heroSection').scrollIntoView({behavior:'smooth'});
+            setTimeout(()=>{
+                document.getElementById('timelineSection').style.display='block';
+                document.getElementById('timelineSection').scrollIntoView({behavior:'smooth'});
+                setTimeout(animateTimeline,500);
+            },300);
+        }
+        
+        function animateTimeline(){
+            document.querySelectorAll('.tl-item').forEach((item,i)=>{
+                setTimeout(()=>item.classList.add('visible'),i*500);
             });
-
-            await delay(7000);
-            runScene2();
         }
-
-        // ==================== STARS BACKGROUND ====================
-        function createStars() {
-            const canvas = document.getElementById('starCanvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            
-            const stars = [];
-            for (let i = 0; i < 150; i++) {
-                stars.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    radius: Math.random() * 1.5 + 0.5,
-                    twinkle: Math.random() * 0.02 + 0.005,
-                    opacity: Math.random()
-                });
-            }
-            
-            function drawStars() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                stars.forEach(star => {
-                    star.opacity += star.twinkle;
-                    if (star.opacity > 1 || star.opacity < 0.2) star.twinkle *= -1;
-                    
-                    ctx.beginPath();
-                    ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(star.opacity)})`;
-                    ctx.fill();
-                });
-                requestAnimationFrame(drawStars);
-            }
-            drawStars();
+        
+        // ==================== PROPOSAL ====================
+        function showProposal(){
+            document.getElementById('overlay').style.display='block';
+            document.getElementById('proposalCard').style.display='block';
         }
-
-        // ==================== SCENE 2 → 3 ====================
-        async function runScene2() {
-            document.getElementById('scene2').style.opacity = '0';
-            await delay(1000);
-            document.getElementById('scene2').classList.add('hidden');
-            document.getElementById('scene3').classList.remove('hidden');
-            runScene3();
+        
+        let noCount=0;
+        const guilt=['😭 ARE YOU SURE?','💔 SYSTEM CRASHING...','🥺 PLEASE DISHU...','😿 BINARY TEARS...','💀 LOVE_ERROR','🙏 ONE CHANCE?'];
+        function moveNo(){
+            const btn=document.getElementById('noBtn');const card=document.getElementById('proposalCard');
+            const cr=card.getBoundingClientRect();const br=btn.getBoundingClientRect();
+            const maxX=cr.width-br.width-20;const maxY=cr.height-br.height-20;
+            const scale=Math.max(0.3,1-(noCount*0.05));
+            btn.style.position='absolute';btn.style.left=Math.random()*maxX+'px';btn.style.top=Math.random()*maxY+'px';
+            btn.style.transform=`scale(${scale})`;noCount++;
+            btn.textContent=guilt[noCount%guilt.length];
+            if(noCount>12){btn.textContent='OKAY... I GIVE UP 😔';btn.style.opacity='0.4';btn.style.pointerEvents='none';}
         }
-
-        // ==================== SCENE 3: ERROR ANIMATION ====================
-        async function runScene3() {
-            const progress3 = document.getElementById('progress3');
-            const scanResult = document.getElementById('scanResult');
-            
-            for (let w = 0; w <= 100; w += 4) {
-                await delay(100);
-                progress3.style.width = w + '%';
-            }
-            
-            scanResult.style.opacity = '1';
-            
-            await delay(3500);
-            document.getElementById('scene3').style.opacity = '0';
-            await delay(1000);
-            document.getElementById('scene3').classList.add('hidden');
-            document.getElementById('scene4').classList.remove('hidden');
-            animateTimeline();
-        }
-
-        // ==================== SCENE 4: TIMELINE ANIMATION ====================
-        async function animateTimeline() {
-            const items = document.querySelectorAll('.timeline-item');
-            for(let item of items) {
-                await delay(600);
-                item.classList.add('visible');
-            }
-        }
-
-        // ==================== SHOW PROPOSAL ====================
-        function showProposal() {
-            document.getElementById('overlay').classList.remove('hidden');
-            document.getElementById('proposalCard').classList.remove('hidden');
-        }
-
-        // ==================== NO BUTTON - GUILT TRIP EDITION ====================
-        let noClickCount = 0;
-        const guiltMessages = [
-            "😭 ARE YOU SURE?",
-            "💔 MY SYSTEM IS CRASHING...",
-            "🥺 PLEASE DON'T...",
-            "😿 I'LL CRY IN BINARY!",
-            "💀 ERROR 404: MERCY NOT FOUND",
-            "🌧️ RAINING IN MY HEART...",
-            "📉 HAPPINESS: ZERO",
-            "💔 HEART.EXE DELETED!",
-            "😭 SIPRA PLEASE!",
-            "🥺 ONE MORE CHANCE?"
-        ];
-
-        function moveNoBtn() {
-            const btn = document.getElementById('noPropBtn');
-            const card = document.getElementById('proposalCard');
-            const cardRect = card.getBoundingClientRect();
-            
-            const currentScale = btn.style.transform ? parseFloat(btn.style.transform.replace(/[^0-9.]/g, '')) : 1;
-            const newScale = Math.max(0.2, currentScale - 0.1);
-            
-            const maxX = cardRect.width - btn.offsetWidth - 20;
-            const maxY = cardRect.height - btn.offsetHeight - 20;
-            
-            btn.style.position = 'absolute';
-            btn.style.left = (Math.random() * maxX) + 'px';
-            btn.style.top = (Math.random() * maxY) + 'px';
-            btn.style.transform = `scale(${newScale})`;
-            
-            noClickCount++;
-            btn.textContent = guiltMessages[noClickCount % guiltMessages.length];
-            
-            if (noClickCount > 15) {
-                btn.textContent = "OKAY... I SURRENDER 😔";
-                btn.style.opacity = '0.5';
-                btn.style.pointerEvents = 'none'; // Give up
-            }
-        }
-
+        
         // ==================== YES CELEBRATION ====================
-        async function sheSaidYes() {
-            document.getElementById('overlay').classList.add('hidden');
-            document.getElementById('proposalCard').classList.add('hidden');
-            document.getElementById('mainScreen').innerHTML = '';
+        async function sheSaidYes(){
+            document.getElementById('overlay').style.display='none';
+            document.getElementById('proposalCard').style.display='none';
             
-            document.body.style.background = "radial-gradient(circle at center, #2b001a 0%, #0a0008 100%)";
-            document.body.style.overflow = "auto";
-            
-            // Firework logic
-            startPremiumFireworks();
+            // Fireworks
+            for(let i=0;i<15;i++){setTimeout(()=>createFirework(Math.random()*window.innerWidth,Math.random()*window.innerHeight*0.6),i*300);}
             
             // Heart Rain
-            for(let i=0; i<80; i++) {
-                setTimeout(() => {
-                    const h = document.createElement('div');
-                    h.style.cssText = `position:fixed; top:-60px; left:${Math.random()*100}vw; font-size:${Math.random()*25+15}px; z-index:50; animation:fall ${Math.random()*3+3}s linear forwards; pointer-events:none; filter:drop-shadow(0 0 10px rgba(255,105,180,0.8)); opacity:0.8;`;
-                    h.textContent = ['❤️','💕','💖','✨','💫'][Math.floor(Math.random()*5)];
-                    document.body.appendChild(h);
-                    setTimeout(() => h.remove(), 6000);
-                }, i*80);
-            }
+            for(let i=0;i<60;i++){setTimeout(()=>{const h=document.createElement('div');h.style.cssText=`position:fixed;top:-50px;left:${Math.random()*100}vw;font-size:${Math.random()*20+15}px;z-index:50;animation:fall ${Math.random()*3+3}s linear forwards;pointer-events:none;`;h.textContent=['❤️','💕','💖','✨','💫'][Math.floor(Math.random()*5)];document.body.appendChild(h);setTimeout(()=>h.remove(),5000);},i*60);}
             
             // Celebration Card
-            const celeb = document.createElement('div');
-            celeb.className = 'celebration-card glass-panel';
-            celeb.innerHTML = `
-                <div style="font-size:8em; animation:heartbeat 1s infinite; filter:drop-shadow(0 0 30px #ff69b4); margin-bottom:10px;">💖</div>
-                <h1 style="margin-bottom:5px;">SHE SAID YES! 🎉</h1>
-                <div style="font-size:2em; font-family:'Dancing Script',cursive; color:#fff; margin:10px 0;">
-                    <p style="text-shadow: 0 0 10px rgba(255,255,255,0.5);">Jatin ❤️ Sipra</p>
-                    <p style="font-size:0.6em; color:#ffb7b2; font-family:'Fira Code', monospace;">Status: Locked In Forever 💍</p>
-                </div>
-                
-                <div style="margin-top:40px; background:rgba(0,0,0,0.4); padding:30px; border-radius:20px; border-left:5px solid #ff69b4; text-align:left; box-shadow:inset 0 0 20px rgba(0,0,0,0.5);">
-                    <p style="font-family:'Dancing Script',cursive; font-size:1.8em; color:#ff69b4; margin-bottom:15px;">My Dearest Sipra,</p>
-                    <p id="finalLetter" class="typewriter-text" style="font-size:1.1em; line-height:1.8; color:#eee;"></p>
-                </div>
-            `;
-            document.body.appendChild(celeb);
+            const c=document.createElement('div');c.className='celebration';
+            c.innerHTML=`<div class="big-heart" style="font-size:7em;">💖</div><h1>SHE SAID YES! 🎉</h1><p style="font-size:1.8em;font-family:'Dancing Script',cursive;color:#fff;">Lomesh ❤️ Dishu</p><p style="font-family:'Fira Code',monospace;color:var(--hacker-green);">STATUS: LOCKED FOREVER 💍</p><div style="margin-top:25px;padding:20px;background:rgba(0,0,0,0.5);border-radius:15px;text-align:left;border-left:3px solid var(--love-pink);"><p style="font-family:'Dancing Script',cursive;font-size:1.5em;color:var(--love-pink);">My Dearest Dishu,</p><p id="finalLetter" style="line-height:1.8;color:#ddd;"></p></div>`;
+            document.body.appendChild(c);
             
-            // Type out the final letter
-            await delay(1500);
-            const letterText = "From the very first moment my eyes met yours, my heart knew it had found its home. You are the most beautiful melody that ever played in my life. Thank you for making me the luckiest guy alive by saying YES. I promise to be your shield, your best friend, and your biggest cheerleader... today, tomorrow, and forever.\n\nForever Yours,\nJatin 💖";
-            await typeText('finalLetter', letterText, 40);
-            document.getElementById('finalLetter').style.borderRight = "none"; // remove cursor
+            // Type final letter
+            const txt='From the very first moment my eyes met yours, my heart knew it had found its home. You are the most beautiful code ever written in my life. Thank you for making me the luckiest guy alive by saying YES. I promise to be your debugger, your firewall, your forever system admin... today, tomorrow, and always.\n\nForever Yours,\nLomesh 💖';
+            const el=document.getElementById('finalLetter');let i=0;
+            function type(){if(i<txt.length){el.textContent+=txt[i];i++;setTimeout(type,30);}else{el.style.borderRight='none';}}
+            setTimeout(type,1000);
         }
-
-        function startPremiumFireworks() {
-            const fireCanvas = document.createElement('canvas');
-            fireCanvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none;';
-            document.body.appendChild(fireCanvas);
-            const fctx = fireCanvas.getContext('2d');
-            fireCanvas.width = window.innerWidth;
-            fireCanvas.height = window.innerHeight;
-            
-            const particles = [];
-            function createFirework(x, y) {
-                const colors = ['#ff69b4','#ffd700','#ff1493','#00ffff','#ffb7b2'];
-                const particleCount = 100;
-                for (let i = 0; i < particleCount; i++) {
-                    const angle = (Math.PI * 2 / particleCount) * i;
-                    const velocity = Math.random() * 6 + 2;
-                    particles.push({
-                        x, y,
-                        vx: Math.cos(angle) * velocity,
-                        vy: Math.sin(angle) * velocity,
-                        life: 1,
-                        color: colors[Math.floor(Math.random() * colors.length)],
-                        size: Math.random() * 4 + 1,
-                        gravity: 0.04
-                    });
-                }
+        
+        function createFirework(x,y){
+            const colors=['#ff69b4','#ffd700','#ff1493','#00ffff','#ff4500'];
+            for(let i=0;i<60;i++){
+                const p=document.createElement('div');
+                const angle=(Math.PI*2/60)*i;
+                const vel=Math.random()*200+100;
+                p.style.cssText=`position:fixed;width:6px;height:6px;border-radius:50%;background:${colors[Math.floor(Math.random()*colors.length)]};left:${x}px;top:${y}px;z-index:55;pointer-events:none;box-shadow:0 0 10px currentColor;animation:burst ${1+Math.random()}s ease-out forwards;--vx:${Math.cos(angle)*vel}px;--vy:${Math.sin(angle)*vel}px;`;
+                document.body.appendChild(p);
+                setTimeout(()=>p.remove(),2000);
             }
-            
-            function animateFireworks() {
-                fctx.fillStyle = 'rgba(0,0,0,0.1)';
-                fctx.fillRect(0, 0, fireCanvas.width, fireCanvas.height);
-                
-                for (let i = particles.length - 1; i >= 0; i--) {
-                    const p = particles[i];
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vy += p.gravity;
-                    p.life -= 0.01;
-                    if (p.life <= 0) { particles.splice(i, 1); continue; }
-                    fctx.beginPath();
-                    fctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    fctx.globalAlpha = p.life;
-                    fctx.fillStyle = p.color;
-                    fctx.fill();
-                }
-                fctx.globalAlpha = 1;
-                requestAnimationFrame(animateFireworks);
-            }
-            
-            let fireworkCount = 0;
-            const fireworkInterval = setInterval(() => {
-                if (fireworkCount > 40) clearInterval(fireworkInterval);
-                createFirework(Math.random() * window.innerWidth, Math.random() * window.innerHeight * 0.6);
-                fireworkCount++;
-            }, 400);
-            
-            animateFireworks();
         }
-
-        async function startFilm() {
-            await runScene1();
-        }
-
-        window.addEventListener('resize', () => {
-            const starCanvas = document.getElementById('starCanvas');
-            if (starCanvas && starCanvas.width !== window.innerWidth) {
-                starCanvas.width = window.innerWidth;
-                starCanvas.height = window.innerHeight;
-            }
-        });
+        const fstyle=document.createElement('style');
+        fstyle.textContent='@keyframes burst{0%{transform:translate(0,0);opacity:1;}100%{transform:translate(var(--vx),var(--vy));opacity:0;}}@keyframes fall{from{transform:translateY(0) rotate(0deg);opacity:0.9;}to{transform:translateY(110vh) rotate(360deg);opacity:0;}}';
+        document.head.appendChild(fstyle);
+        
+        window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);mxCanvas.width=window.innerWidth;mxCanvas.height=window.innerHeight;});
     </script>
 </body>
 </html>
