@@ -3,512 +3,457 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💻 Anandi ❤️ Sai — System Compromised 💻</title>
+    <title>💻 Anandi ❤️ Sai — Love Protocol 💻</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Pacifico&family=Dancing+Script:wght@400;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        :root {
-            --hacker-green: #00ff41;
-            --love-pink: #ff69b4;
-            --gold: #ffd700;
-            --cyan: #00ffff;
-            --bg: #020510;
-            --text: #e0e0e0;
-            --glass: rgba(255,255,255,0.04);
-            --glass-border: rgba(255,255,255,0.1);
-        }
-        
+
         body {
             font-family: 'Fira Code', monospace;
-            background: var(--bg);
-            color: var(--text);
-            overflow-x: hidden;
+            background: #0a0a0f;
+            color: #e0e0e0;
             min-height: 100vh;
-            cursor: default;
-            user-select: none;
-            -webkit-user-select: none;
+            overflow-x: hidden;
         }
-        
-        #bgCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
-        #matrixCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; opacity: 0.05; pointer-events: none; }
-        
-        .scanlines {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 2px, transparent 2px, transparent 4px);
-            z-index: 2; pointer-events: none; opacity: 0.4;
-        }
-        
-        .cursor-terminal {
-            width: 15px; height: 25px; background: var(--love-pink);
-            position: fixed; pointer-events: none; z-index: 99999; mix-blend-mode: difference;
-            clip-path: polygon(0 0, 80% 0, 100% 20%, 100% 100%, 0 100%);
-        }
-        
+
+        /* Music Player */
         .music-player {
-            position: fixed; top: 25px; right: 25px; z-index: 100;
-            display: flex; align-items: center; gap: 12px;
-            background: rgba(0,0,0,0.7); backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,105,180,0.3); border-radius: 50px;
-            padding: 10px 20px 10px 10px;
-            box-shadow: 0 0 30px rgba(255,105,180,0.1);
+            position: fixed; top: 20px; right: 20px; z-index: 999;
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(10,10,15,0.9); border: 1px solid #ff69b4;
+            border-radius: 50px; padding: 8px 18px 8px 8px;
+            box-shadow: 0 0 25px rgba(255,105,180,0.3);
         }
-        .vinyl-disc {
-            width: 42px; height: 42px; border-radius: 50%;
-            background: radial-gradient(circle, #111 30%, #222 60%, #333 100%);
-            display: flex; align-items: center; justify-content: center;
-            animation: vinylSpin 3s linear infinite paused;
-            border: 2px solid rgba(255,105,180,0.3);
+        .music-btn {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(255,105,180,0.15); border: 2px solid #ff69b4;
+            color: #ff69b4; cursor: pointer; font-size: 1rem;
+            transition: 0.3s; display: flex; align-items: center; justify-content: center;
         }
-        .vinyl-disc.playing { animation-play-state: running; }
-        @keyframes vinylSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .vinyl-center { width: 12px; height: 12px; background: var(--love-pink); border-radius: 50%; }
-        .play-btn {
-            width: 38px; height: 38px; border-radius: 50%;
-            background: rgba(255,105,180,0.1); border: 2px solid var(--love-pink);
-            color: var(--love-pink); cursor: pointer; font-size: 0.9rem;
-            transition: all 0.3s;
+        .music-btn:hover { background: #ff69b4; color: #fff; }
+        .music-name { color: #ff69b4; font-size: 0.8rem; font-weight: 700; }
+        .music-playing .music-btn { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%,100%{box-shadow:0 0 10px #ff69b4;} 50%{box-shadow:0 0 30px #ff69b4;} }
+
+        audio { display: none; }
+
+        /* Main Container */
+        .main { max-width: 750px; margin: 0 auto; padding: 20px; }
+
+        /* Section 1: Terminal */
+        .section { min-height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }
+        .section.active { display: flex; }
+
+        .terminal {
+            background: #000; border: 2px solid #ff69b4; border-radius: 12px;
+            padding: 30px 25px; width: 100%; max-width: 600px;
+            box-shadow: 0 0 50px rgba(255,105,180,0.2), inset 0 0 30px rgba(0,0,0,0.8);
+            position: relative;
         }
-        .play-btn:hover { background: var(--love-pink); color: #000; box-shadow: 0 0 25px var(--love-pink); }
-        .song-info { display: flex; flex-direction: column; }
-        .song-name { font-size: 0.75rem; color: var(--love-pink); font-weight: 700; letter-spacing: 1px; }
-        .song-artist { font-size: 0.6rem; color: #888; }
-        
-        .universe-container { position: relative; z-index: 3; max-width: 1000px; margin: 0 auto; padding: 20px; }
-        
-        .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 60px 20px; }
-        
-        .terminal-box {
-            background: rgba(0,0,0,0.8); border: 1px solid var(--love-pink);
-            border-radius: 15px; padding: 35px 30px; text-align: left;
-            max-width: 600px; width: 100%; margin: 20px auto;
-            box-shadow: 0 0 40px rgba(255,105,180,0.15), inset 0 0 30px rgba(0,0,0,0.5);
-            position: relative; overflow: hidden;
+        .terminal-dots {
+            position: absolute; top: 12px; left: 15px;
+            display: flex; gap: 8px;
         }
-        .terminal-box::before {
-            content: ''; position: absolute; top: 10px; left: 15px;
-            width: 12px; height: 12px; background: #ff5f56; border-radius: 50%;
-            box-shadow: 20px 0 0 #ffbd2e, 40px 0 0 #27c93f;
+        .terminal-dots span {
+            width: 12px; height: 12px; border-radius: 50%;
         }
-        .terminal-line { color: var(--love-pink); font-size: 0.85rem; margin: 8px 0; opacity: 0; animation: fadeInLine 0.3s forwards; }
-        @keyframes fadeInLine { to { opacity: 1; } }
-        .terminal-prompt { color: var(--hacker-green); }
-        .terminal-highlight { color: var(--gold); font-weight: bold; }
-        .terminal-cursor { display: inline-block; width: 10px; height: 1.2em; background: var(--love-pink); animation: blink 0.7s infinite; }
-        @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
-        
-        .glitch-text {
-            font-family: 'Orbitron', sans-serif; font-size: clamp(1.8rem, 5vw, 3.5rem);
-            color: var(--love-pink); text-shadow: 2px 2px 0 #ff1493, -2px -2px 0 var(--gold);
-            animation: glitch 0.5s infinite;
+        .terminal-dots span:nth-child(1) { background: #ff5f56; }
+        .terminal-dots span:nth-child(2) { background: #ffbd2e; }
+        .terminal-dots span:nth-child(3) { background: #27c93f; }
+        .terminal-text { margin-top: 15px; min-height: 150px; }
+        .t-line { margin: 6px 0; font-size: 0.85rem; opacity: 0; animation: showLine 0.5s forwards; }
+        .t-line:nth-child(1) { animation-delay: 0.3s; }
+        .t-line:nth-child(2) { animation-delay: 1s; }
+        .t-line:nth-child(3) { animation-delay: 1.7s; }
+        .t-line:nth-child(4) { animation-delay: 2.4s; }
+        .t-line:nth-child(5) { animation-delay: 3.1s; }
+        @keyframes showLine { to { opacity: 1; } }
+        .green { color: #00ff41; }
+        .pink { color: #ff69b4; }
+        .gold { color: #ffd700; }
+        .blink {
+            display: inline-block; width: 10px; height: 18px; background: #ff69b4;
+            animation: blinkAnim 0.8s infinite; vertical-align: middle;
         }
-        @keyframes glitch {
-            0%,100% { transform: translate(0); }
-            20% { transform: translate(-2px, 2px); }
-            40% { transform: translate(2px, -2px); }
-            60% { transform: translate(-1px, -1px); }
-            80% { transform: translate(1px, 1px); }
+        @keyframes blinkAnim { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
+        .reveal-box { display: none; text-align: center; margin-top: 40px; }
+        .reveal-box.show { display: block; animation: fadeUp 0.8s ease; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .glitch {
+            font-family: 'Orbitron', sans-serif; font-size: 2.5rem; color: #ff69b4;
+            text-shadow: 2px 2px 0 #ff1493, -2px -2px 0 #ffd700;
         }
-        
-        .name-reveal {
-            font-family: 'Dancing Script', cursive; font-size: clamp(3rem, 10vw, 7rem);
-            background: linear-gradient(45deg, #ff69b4, #ffd700, #ff69b4); background-size: 300% 300%;
+        .name-big {
+            font-family: 'Dancing Script', cursive; font-size: 5rem;
+            background: linear-gradient(45deg, #ff69b4, #ffd700, #ff69b4);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            animation: gradientShift 3s ease infinite, nameFloat 4s ease-in-out infinite;
-            margin: 25px 0;
+            animation: shimmer 3s infinite;
         }
-        @keyframes gradientShift { 0%,100%{background-position:0% 50%;} 50%{background-position:100% 50%;} }
-        @keyframes nameFloat { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-12px);} }
-        
+        @keyframes shimmer { 0%,100%{filter:brightness(1);} 50%{filter:brightness(1.3);} }
         .from-badge {
             display: inline-block; background: rgba(255,105,180,0.15);
-            border: 1px solid rgba(255,105,180,0.3); border-radius: 50px;
-            padding: 8px 22px; font-size: 0.9rem; color: var(--love-pink);
-            margin: 10px 0;
+            border: 1px solid #ff69b4; border-radius: 30px;
+            padding: 6px 20px; margin: 10px 0; font-size: 0.85rem; color: #ff69b4;
         }
-        .from-badge i { margin-right: 6px; }
-        
+        .quote { color: #ccc; font-style: italic; margin: 10px 0; font-size: 1rem; }
+
         .btn {
-            padding: 14px 35px; font-size: 1rem; font-family: 'Fira Code', monospace;
-            border: none; border-radius: 50px; cursor: pointer; font-weight: 700;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            text-transform: uppercase; letter-spacing: 2px; margin: 10px;
-            position: relative; overflow: hidden;
+            display: inline-block; padding: 14px 35px; border: none; border-radius: 50px;
+            cursor: pointer; font-family: 'Fira Code', monospace; font-weight: 700;
+            font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;
+            transition: all 0.3s ease; margin: 8px; text-decoration: none;
         }
         .btn-pink {
-            background: linear-gradient(135deg, #ff1493, #ff69b4);
-            color: #fff; box-shadow: 0 10px 30px rgba(255,105,180,0.4);
+            background: linear-gradient(135deg, #ff1493, #ff69b4); color: #fff;
+            box-shadow: 0 8px 25px rgba(255,105,180,0.4);
         }
-        .btn-pink:hover { transform: scale(1.05) translateY(-5px); box-shadow: 0 20px 50px rgba(255,105,180,0.6); }
-        .btn-gold {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            color: #1a0030; box-shadow: 0 10px 30px rgba(255,215,0,0.4);
+        .btn-pink:hover { transform: translateY(-4px); box-shadow: 0 15px 40px rgba(255,105,180,0.6); }
+
+        /* Section 2: Timeline */
+        .timeline-box { width: 100%; max-width: 650px; position: relative; }
+        .timeline-line {
+            position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
+            background: linear-gradient(to bottom, transparent, #ff69b4, #ffd700, #ff69b4, transparent);
+            transform: translateX(-50%);
         }
-        .btn-gold:hover { transform: scale(1.05) translateY(-5px); box-shadow: 0 20px 50px rgba(255,215,0,0.6); }
-        
-        /* Timeline */
-        .timeline-section { padding: 60px 0; }
-        .tl-title { text-align: center; font-family: 'Orbitron', sans-serif; color: var(--love-pink); 
-            letter-spacing: 3px; margin-bottom: 40px; font-size: 1.4rem; }
-        .timeline { position: relative; max-width: 700px; margin: 0 auto; padding: 20px; }
-        .tl-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 3px;
-            background: linear-gradient(to bottom, transparent, var(--love-pink), var(--gold), var(--love-pink), transparent);
-            transform: translateX(-50%); box-shadow: 0 0 15px rgba(255,105,180,0.5); border-radius: 2px; }
-        .tl-item { display: flex; align-items: center; margin: 45px 0; position: relative; 
-            opacity: 0; transform: translateY(30px); transition: all 0.8s ease; }
-        .tl-item.visible { opacity: 1; transform: translateY(0); }
-        .tl-item:nth-child(odd) { flex-direction: row; }
-        .tl-item:nth-child(even) { flex-direction: row-reverse; }
-        .tl-dot { width: 50px; height: 50px; min-width: 50px; border-radius: 50%;
-            background: #111; border: 3px solid var(--love-pink); display: flex; align-items: center; justify-content: center;
-            font-size: 1.3em; z-index: 2; box-shadow: 0 0 20px rgba(255,105,180,0.4); }
-        .tl-content { padding: 18px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,105,180,0.15); border-radius: 15px; max-width: 45%; margin: 0 25px; }
-        .tl-item:nth-child(even) .tl-content { text-align: right; }
-        .tl-content h3 { color: var(--gold); font-family: 'Dancing Script', cursive; font-size: 1.4em; margin-bottom: 6px; }
-        .tl-content p { color: #ccc; font-size: 0.8rem; line-height: 1.6; }
-        
-        /* Proposal */
-        .overlay {
+        .tl-item { display: flex; align-items: center; margin: 35px 0; position: relative; }
+        .tl-item.left { flex-direction: row; }
+        .tl-item.right { flex-direction: row-reverse; }
+        .tl-dot {
+            width: 48px; height: 48px; min-width: 48px; border-radius: 50%;
+            background: #111; border: 3px solid #ff69b4;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3em; z-index: 2; box-shadow: 0 0 20px rgba(255,105,180,0.4);
+        }
+        .tl-card {
+            background: rgba(0,0,0,0.7); border: 1px solid rgba(255,105,180,0.2);
+            border-radius: 12px; padding: 16px 20px; max-width: 45%; margin: 0 20px;
+        }
+        .tl-item.right .tl-card { text-align: right; }
+        .tl-card h3 { color: #ffd700; font-family: 'Dancing Script', cursive; font-size: 1.3em; margin-bottom: 6px; }
+        .tl-card p { color: #bbb; font-size: 0.8rem; line-height: 1.5; }
+
+        .tl-center { justify-content: center !important; margin: 30px 0; }
+
+        /* Section 3: Proposal */
+        .proposal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 98; backdrop-filter: blur(15px);
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+            z-index: 998; display: none; align-items: center; justify-content: center;
         }
+        .proposal-overlay.show { display: flex; }
         .proposal-card {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 99;
-            text-align: center; padding: 45px 35px; max-width: 520px; width: 90%;
-            background: rgba(10,0,20,0.95); backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,105,180,0.3); border-radius: 30px;
-            box-shadow: 0 30px 80px rgba(255,105,180,0.25), 0 0 100px rgba(255,105,180,0.08);
-            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(15,5,25,0.95); border: 1px solid rgba(255,105,180,0.3);
+            border-radius: 25px; padding: 40px 30px; text-align: center; max-width: 500px;
+            box-shadow: 0 30px 80px rgba(255,105,180,0.3);
+            animation: popIn 0.5s ease;
         }
-        @keyframes popIn { from { transform: translate(-50%, -50%) scale(0.8); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
-        .proposal-card h1 { font-family: 'Pacifico', cursive; color: var(--love-pink); font-size: 2.5em; 
-            text-shadow: 0 0 20px rgba(255,105,180,0.5); }
-        .big-heart { font-size: 5em; animation: heartbeat 1s infinite; display: inline-block; 
-            filter: drop-shadow(0 0 30px rgba(255,20,147,0.7)); }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .big-heart { font-size: 5em; animation: heartbeat 1s infinite; }
         @keyframes heartbeat { 0%,100%{transform:scale(1);} 15%{transform:scale(1.3);} 30%{transform:scale(1);} 45%{transform:scale(1.2);} 60%{transform:scale(1);} }
-        .no-btn { position: relative; transition: all 0.15s ease-out; }
-        
+        .proposal-card h2 { font-family: 'Pacifico', cursive; color: #ff69b4; font-size: 2.2em; margin: 10px 0; }
+        .proposal-card .question { font-family: 'Dancing Script', cursive; font-size: 1.6em; color: #ff69b4; margin: 20px 0; }
+        .no-btn { position: relative; }
+        .no-btn.btn-pink { background: linear-gradient(135deg, #ff3333, #cc0000); box-shadow: 0 8px 25px rgba(255,0,0,0.4); }
+
         /* Celebration */
-        .celebration {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 100;
-            text-align: center; padding: 45px; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,215,0,0.3); border-radius: 30px;
-            box-shadow: 0 0 100px rgba(255,215,0,0.25); animation: popIn 0.8s ease;
+        .firework {
+            position: fixed; width: 6px; height: 6px; border-radius: 50%;
+            z-index: 9999; pointer-events: none;
+            animation: burst 1.5s ease-out forwards;
         }
-        .celebration h1 { font-family: 'Pacifico', cursive; font-size: 3.5em; color: var(--gold); 
-            text-shadow: 0 0 40px var(--gold); }
-        
+        @keyframes burst {
+            0% { transform: translate(0,0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+        }
+        .heart-rain {
+            position: fixed; z-index: 9998; pointer-events: none;
+            animation: rainFall 4s linear forwards;
+        }
+        @keyframes rainFall {
+            from { transform: translateY(-50px) rotate(0deg); opacity: 0.9; }
+            to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+        .celeb-card {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 10000; text-align: center; padding: 40px;
+            background: rgba(0,0,0,0.9); border: 2px solid #ffd700;
+            border-radius: 25px; box-shadow: 0 0 80px rgba(255,215,0,0.3);
+            animation: popIn 0.8s ease;
+        }
+        .celeb-card h1 { font-family: 'Pacifico', cursive; font-size: 3em; color: #ffd700; }
+
         @media (max-width: 768px) {
-            .terminal-box { padding: 20px; }
-            .tl-line { left: 20px; }
-            .tl-item:nth-child(odd), .tl-item:nth-child(even) { flex-direction: column; align-items: flex-start; padding-left: 50px; }
-            .tl-dot { position: absolute; left: 0; width: 40px; height: 40px; min-width: 40px; font-size: 1em; }
-            .tl-content { max-width: 100%; margin: 0; text-align: left !important; }
-            .proposal-card { padding: 25px; }
-            .proposal-card h1 { font-size: 1.8em; }
+            .name-big { font-size: 3rem; }
+            .glitch { font-size: 1.5rem; }
+            .terminal { padding: 20px 15px; }
+            .timeline-line { left: 20px; }
+            .tl-item.left, .tl-item.right { flex-direction: column; align-items: flex-start; padding-left: 45px; }
+            .tl-dot { position: absolute; left: -4px; width: 38px; height: 38px; min-width: 38px; font-size: 1em; }
+            .tl-card { max-width: 100%; margin: 0; text-align: left !important; }
+            .tl-center { padding-left: 0; justify-content: center !important; }
         }
     </style>
 </head>
 <body>
-    
-    <canvas id="bgCanvas"></canvas>
-    <canvas id="matrixCanvas"></canvas>
-    <div class="scanlines"></div>
-    <div class="cursor-terminal" id="termCursor"></div>
-    
-    <!-- Music Player -->
-    <div class="music-player">
-        <div class="vinyl-disc" id="vinylDisc"><div class="vinyl-center"></div></div>
-        <button class="play-btn" id="musicToggle"><i class="fas fa-play"></i></button>
-        <div class="song-info"><span class="song-name">🎵 Bairan</span><span class="song-artist">Nand Jhari</span></div>
-    </div>
-    
-    <audio id="bgMusic" loop autoplay muted playsinline preload="auto">
+
+    <!-- Music -->
+    <audio id="bgMusic" loop preload="auto">
         <source src="assets/music/bairan.mp3" type="audio/mpeg">
     </audio>
 
-    <div class="universe-container">
-        
-        <!-- HERO -->
-        <section class="hero" id="heroSection">
-            <div class="terminal-box" id="terminalBox">
-                <div style="padding-top:20px;"></div>
-                <div class="terminal-line" style="animation-delay:0.3s;">
-                    <span class="terminal-prompt">anandi@heart:~$</span> ./find_soulmate.sh
-                </div>
-                <div class="terminal-line" style="animation-delay:0.8s;">
-                    Scanning universe for <span class="terminal-highlight">Sai</span>...
-                </div>
-                <div class="terminal-line" style="animation-delay:1.4s;">
-                    ████████████████████ 100% — <span style="color:#ffd700;">SOULMATE FOUND!</span>
-                </div>
-                <div class="terminal-line" style="animation-delay:2s;">
-                    <span class="terminal-prompt">anandi@heart:~$</span> cat /feelings/love.txt
-                </div>
-                <div class="terminal-line" style="animation-delay:2.5s;">
-                    STATUS: <span class="terminal-highlight">MADLY IN LOVE WITH SAI</span> 💘
-                </div>
-                <div class="terminal-line" style="animation-delay:3s;">
-                    <span class="terminal-prompt">anandi@heart:~$</span> <span class="terminal-cursor"></span>
-                </div>
-            </div>
-            
-            <div id="heroReveal" style="display:none;">
-                <h2 class="glitch-text">💖 TARGET LOCKED 💖</h2>
-                <h1 class="name-reveal">Sai</h1>
-                <div class="from-badge"><i class="fas fa-heart"></i> From: Anandi</div>
-                <p style="font-size:1.2rem;color:#ddd;margin:15px 0;font-style:italic;">
-                    You're the most beautiful algorithm my heart ever compiled 💕
-                </p>
-                
-                <!-- Polaroid Gallery -->
-                <div style="display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin:35px 0;perspective:1000px;">
-                    <div style="background:#fff;padding:12px 12px 40px 12px;border-radius:4px;box-shadow:0 15px 40px rgba(0,0,0,0.6);width:150px;transform:rotate(-6deg);cursor:pointer;transition:0.5s;"
-                         onmouseover="this.style.transform='rotate(0deg) scale(1.1)';this.style.boxShadow='0 20px 50px rgba(255,105,180,0.5)';"
-                         onmouseout="this.style.transform='rotate(-6deg) scale(1)';this.style.boxShadow='0 15px 40px rgba(0,0,0,0.6)';">
-                        <div style="width:100%;height:100px;background:linear-gradient(135deg,#ff9a9e,#fecfef);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:3em;">👀</div>
-                        <p style="color:#222;font-family:'Dancing Script',cursive;font-size:1.2em;margin-top:8px;font-weight:700;">First Glance</p>
-                    </div>
-                    <div style="background:#fff;padding:12px 12px 40px 12px;border-radius:4px;box-shadow:0 15px 40px rgba(0,0,0,0.6);width:150px;transform:rotate(4deg);cursor:pointer;transition:0.5s;"
-                         onmouseover="this.style.transform='rotate(0deg) scale(1.1)';this.style.boxShadow='0 20px 50px rgba(255,105,180,0.5)';"
-                         onmouseout="this.style.transform='rotate(4deg) scale(1)';this.style.boxShadow='0 15px 40px rgba(0,0,0,0.6)';">
-                        <div style="width:100%;height:100px;background:linear-gradient(120deg,#a1c4fd,#c2e9fb);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:3em;">💝</div>
-                        <p style="color:#222;font-family:'Dancing Script',cursive;font-size:1.2em;margin-top:8px;font-weight:700;">Heart Sync</p>
-                    </div>
-                </div>
-            </div>
-            
-            <button class="btn btn-pink" id="continueBtn" style="display:none;" onclick="showTimeline()">
-                ⚡ CONTINUE MISSION ⚡
-            </button>
-        </section>
-        
-        <!-- TIMELINE -->
-        <section class="timeline-section" id="timelineSection" style="display:none;">
-            <h2 class="tl-title">📜 ANANDI'S LOVE DIARY 📜</h2>
-            <div class="timeline" id="timelineScroll">
-                <div class="tl-line"></div>
-                
-                <div class="tl-item">
-                    <div class="tl-dot">👀</div>
-                    <div class="tl-content">
-                        <h3>First Connection</h3>
-                        <p>Jab pehli baar Sai ko dekha, mera poora dil ek dum se **system crash** kar gaya! Duniya slow-mo mein thi — sabse beautiful meeting thi wo! 💘</p>
-                    </div>
-                </div>
-                
-                <div class="tl-item">
-                    <div class="tl-dot">💬</div>
-                    <div class="tl-content">
-                        <h3>Voice Protocol</h3>
-                        <p>Sai ki aawaz suni toh laga jaise koi **magical frequency** mere dil mein resonate karne lagi. Har baat ek cute notification ban gayi! 🎵</p>
-                    </div>
-                </div>
-                
-                <div class="tl-item">
-                    <div class="tl-dot">☕</div>
-                    <div class="tl-content">
-                        <h3>Memory Cache</h3>
-                        <p>Wo coffee dates aur endless conversations... Sai ke saath bitaye har pal meri **permanent memory** ban gaye. Kabhi delete nahi honge! ☕💕</p>
-                    </div>
-                </div>
-                
-                <div class="tl-item">
-                    <div class="tl-dot">🌙</div>
-                    <div class="tl-content">
-                        <h3>Night Renders</h3>
-                        <p>Kitni raatein Sai ke baare mein sochte-sochte guzar gayi... Har raat ek **beautiful infinite loop** ban gayi. Neend udh gayi, sapne Sai se bhare! 🌌✨</p>
-                    </div>
-                </div>
-                
-                <div class="tl-item" style="justify-content:center;">
-                    <div class="tl-dot" style="width:65px;height:65px;font-size:2.2em;border-color:var(--gold);">❓</div>
-                </div>
-            </div>
-            
-            <div style="text-align:center;margin-top:30px;">
-                <button class="btn btn-pink" onclick="showProposal()">💝 UNLOCK FINAL CHAPTER 💝</button>
-            </div>
-        </section>
-        
+    <div class="music-player" id="musicPlayer">
+        <button class="music-btn" id="musicToggle">▶</button>
+        <span class="music-name">🎵 Bairan - Nand Jhari</span>
     </div>
-    
-    <!-- Proposal -->
-    <div class="overlay" id="overlay" style="display:none;"></div>
-    <div class="proposal-card" id="proposalCard" style="display:none;">
-        <div class="big-heart">💖</div>
-        <h1>The Ultimate Truth...</h1>
-        <p style="color:#ffb7b2;font-size:0.95rem;">This whole "system hack" was just an excuse...</p>
-        <p style="font-size:0.95rem;">Because Anandi needed the perfect way to tell you...</p>
-        
-        <div style="margin:20px 0;padding:18px;background:rgba(0,0,0,0.4);border-radius:15px;border:1px solid rgba(255,215,0,0.3);">
-            <p style="font-size:2.2em;font-family:'Pacifico',cursive;color:var(--gold);text-shadow:0 0 20px var(--gold);">
-                I LOVE YOU, SAI! 🌹
-            </p>
+
+    <div class="main" id="mainContent">
+
+        <!-- SECTION 1: TERMINAL -->
+        <div class="section active" id="sec1">
+            <div class="terminal">
+                <div class="terminal-dots"><span></span><span></span><span></span></div>
+                <div class="terminal-text">
+                    <div class="t-line"><span class="green">anandi@heart:~$</span> <span class="pink">./find_soulmate.sh</span></div>
+                    <div class="t-line">Scanning universe for <span class="gold">Sai</span>...</div>
+                    <div class="t-line"><span class="gold">████████████████████ 100% — SOULMATE FOUND!</span></div>
+                    <div class="t-line"><span class="green">anandi@heart:~$</span> <span class="pink">cat /feelings/love.txt</span></div>
+                    <div class="t-line">STATUS: <span class="gold">MADLY IN LOVE WITH SAI</span> 💘</div>
+                </div>
+            </div>
+
+            <div class="reveal-box" id="heroReveal">
+                <div class="glitch">💖 TARGET LOCKED 💖</div>
+                <div class="name-big">Sai</div>
+                <div class="from-badge"><i class="fas fa-heart"></i> A Message from Anandi</div>
+                <p class="quote">"You're the most beautiful code my heart ever compiled." 💕</p>
+
+                <!-- Polaroids -->
+                <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin:25px 0;">
+                    <div style="background:#fff;padding:10px 10px 35px 10px;border-radius:3px;box-shadow:0 12px 30px rgba(0,0,0,0.5);width:130px;transform:rotate(-5deg);">
+                        <div style="width:100%;height:85px;background:linear-gradient(135deg,#ff9a9e,#fecfef);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:2.5em;">👀</div>
+                        <p style="color:#222;font-family:'Dancing Script',cursive;font-size:1em;margin-top:5px;font-weight:700;">First Sight</p>
+                    </div>
+                    <div style="background:#fff;padding:10px 10px 35px 10px;border-radius:3px;box-shadow:0 12px 30px rgba(0,0,0,0.5);width:130px;transform:rotate(3deg);">
+                        <div style="width:100%;height:85px;background:linear-gradient(120deg,#a1c4fd,#c2e9fb);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:2.5em;">💝</div>
+                        <p style="color:#222;font-family:'Dancing Script',cursive;font-size:1em;margin-top:5px;font-weight:700;">Heart Sync</p>
+                    </div>
+                </div>
+
+                <button class="btn btn-pink" onclick="goToTimeline()">
+                    ⚡ CONTINUE MISSION ⚡
+                </button>
+            </div>
         </div>
-        
-        <p style="font-size:0.95rem;">You're the most beautiful code ever written in my life,</p>
-        <p style="margin-bottom:18px;font-size:0.95rem;">And Anandi never, ever wants to debug this feeling! 💕</p>
-        
-        <p style="font-size:1.8em;font-family:'Dancing Script',cursive;color:var(--love-pink);text-shadow:0 0 10px var(--love-pink);margin-bottom:20px;">
-            Sai, Will You Be Mine Forever? 💍
-        </p>
-        
-        <div style="display:flex;justify-content:center;gap:15px;flex-wrap:wrap;">
-            <button class="btn btn-pink" onclick="heSaidYes()" style="font-size:1.3em;padding:14px 40px;">YES! 💕</button>
-            <button class="btn btn-gold no-btn" id="noBtn" onmouseover="moveNo()" onclick="moveNo()" style="font-size:1em;">NO 😭</button>
+
+        <!-- SECTION 2: TIMELINE -->
+        <div class="section" id="sec2">
+            <h2 style="font-family:'Orbitron',sans-serif;color:#ff69b4;text-align:center;margin-bottom:30px;letter-spacing:2px;">
+                📜 ANANDI'S LOVE DIARY 📜
+            </h2>
+            <div class="timeline-box" id="timelineBox">
+                <div class="timeline-line"></div>
+                <div class="tl-item left"><div class="tl-dot">👀</div><div class="tl-card"><h3>First Connection</h3><p>Jab pehli baar Sai ko dekha, mera poora dil ek dum se crash kar gaya! Duniya slow-mo mein thi — sabse beautiful meeting thi wo! 💘</p></div></div>
+                <div class="tl-item right"><div class="tl-dot">💬</div><div class="tl-card"><h3>Voice Protocol</h3><p>Sai ki aawaz suni toh laga jaise koi magical frequency mere dil mein resonate karne lagi. Har baat ek cute notification ban gayi! 🎵</p></div></div>
+                <div class="tl-item left"><div class="tl-dot">☕</div><div class="tl-card"><h3>Memory Cache</h3><p>Wo coffee dates aur endless conversations... Sai ke saath bitaye har pal meri permanent memory ban gaye. Kabhi delete nahi honge! ☕💕</p></div></div>
+                <div class="tl-item right"><div class="tl-dot">🌙</div><div class="tl-card"><h3>Night Renders</h3><p>Kitni raatein Sai ke baare mein sochte-sochte guzar gayi... Har raat ek beautiful infinite loop ban gayi. Neend udh gayi, sapne Sai se bhare! 🌌✨</p></div></div>
+                <div class="tl-item tl-center"><div class="tl-dot" style="width:60px;height:60px;font-size:2em;border-color:#ffd700;">❓</div></div>
+            </div>
+            <button class="btn btn-pink" onclick="showProposal()" style="margin-top:20px;">💝 UNLOCK FINAL CHAPTER 💝</button>
+        </div>
+
+    </div>
+
+    <!-- PROPOSAL OVERLAY -->
+    <div class="proposal-overlay" id="proposalOverlay">
+        <div class="proposal-card">
+            <div class="big-heart">💖</div>
+            <h2>The Ultimate Truth...</h2>
+            <p style="color:#ccc;font-size:0.9rem;">This whole "system hack" was just an excuse...</p>
+            <p style="color:#ccc;font-size:0.9rem;">Because Anandi needed the perfect way to tell you...</p>
+            <div style="margin:15px 0;padding:15px;background:rgba(0,0,0,0.4);border-radius:10px;border:1px solid rgba(255,215,0,0.3);">
+                <p style="font-size:2em;font-family:'Pacifico',cursive;color:#ffd700;">I LOVE YOU, SAI! 🌹</p>
+            </div>
+            <p style="font-size:0.9rem;color:#ccc;">You're the most beautiful code ever written in my life.</p>
+            <p style="font-size:0.9rem;color:#ccc;">And Anandi never wants to debug this feeling! 💕</p>
+            <p class="question">Sai, Will You Be Mine Forever? 💍</p>
+            <button class="btn btn-pink" onclick="heSaidYes()" style="font-size:1.2em;padding:12px 35px;">YES! 💕</button>
+            <button class="btn btn-pink no-btn" id="noBtn" onmouseover="moveNoBtn()" onclick="moveNoBtn()" style="font-size:0.9em;">NO 😭</button>
         </div>
     </div>
 
     <script>
-        // ==================== 3D BACKGROUND ====================
-        const bgCanvas=document.getElementById('bgCanvas');
-        const renderer=new THREE.WebGLRenderer({canvas:bgCanvas,antialias:true,alpha:true});
-        renderer.setSize(window.innerWidth,window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-        const scene=new THREE.Scene();
-        const camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
-        camera.position.z=35;
-        
-        scene.add(new THREE.AmbientLight(0xffffff,0.4));
-        const l1=new THREE.PointLight(0xff69b4,0.6,80);l1.position.set(10,10,25);scene.add(l1);
-        const l2=new THREE.PointLight(0xffd700,0.4,80);l2.position.set(-10,-5,20);scene.add(l2);
-        
-        const hearts=[];
-        for(let i=0;i<40;i++){
-            const sh=new THREE.Shape();
-            sh.moveTo(0,0.5);sh.bezierCurveTo(0,1.5,-2,1.5,-2,0.5);sh.bezierCurveTo(-2,-1,0,-1.5,0,-2.5);sh.bezierCurveTo(0,-1.5,2,-1,2,0.5);sh.bezierCurveTo(2,1.5,0,1.5,0,0.5);
-            const g=new THREE.ExtrudeGeometry(sh,{depth:0.2,bevelEnabled:true,bevelThickness:0.1,bevelSize:0.1});
-            const m=new THREE.MeshPhongMaterial({color:new THREE.Color().setHSL(0.9+Math.random()*0.1,0.8,0.6+Math.random()*0.3),emissive:new THREE.Color().setHSL(0.9,0.4,0.15),shininess:120,transparent:true,opacity:0.5+Math.random()*0.4});
-            const h=new THREE.Mesh(g,m);
-            h.position.set((Math.random()-0.5)*45,(Math.random()-0.5)*45,(Math.random()-0.5)*18);
-            h.rotation.set(Math.random()*Math.PI*2,Math.random()*Math.PI*2,Math.random()*Math.PI*2);
-            const s=0.2+Math.random()*1.5;h.scale.set(s,s,s);
-            h.userData={rx:(Math.random()-0.5)*0.008,ry:(Math.random()-0.5)*0.008,rz:(Math.random()-0.5)*0.008,fs:0.001+Math.random()*0.004,fa:0.5+Math.random()*2,iy:h.position.y,ph:Math.random()*Math.PI*2};
-            hearts.push(h);scene.add(h);
-        }
-        
-        for(let i=0;i<15;i++){
-            const g=new THREE.TorusGeometry(0.6+Math.random()*1,0.06,16,32);
-            const m=new THREE.MeshPhongMaterial({color:0xffd700,emissive:0xffd700,emissiveIntensity:0.3,shininess:200,transparent:true,opacity:0.5+Math.random()*0.4});
-            const r=new THREE.Mesh(g,m);
-            r.position.set((Math.random()-0.5)*40,(Math.random()-0.5)*40,(Math.random()-0.5)*15);
-            r.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI);
-            r.userData={rx:(Math.random()-0.5)*0.01,ry:(Math.random()-0.5)*0.01,rz:(Math.random()-0.5)*0.01,fs:0.001+Math.random()*0.003,fa:0.5+Math.random()*1.5,iy:r.position.y,ph:Math.random()*Math.PI*2};
-            scene.add(r);
-        }
-        
-        const sg=new THREE.BufferGeometry();const sc=500;const sp=new Float32Array(sc*3);
-        for(let i=0;i<sc*3;i+=3){sp[i]=(Math.random()-0.5)*60;sp[i+1]=(Math.random()-0.5)*60;sp[i+2]=(Math.random()-0.5)*30;}
-        sg.setAttribute('position',new THREE.BufferAttribute(sp,3));
-        const st=new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.12,transparent:true,blending:THREE.AdditiveBlending}));
-        scene.add(st);
-        
-        let mx=0,my=0;
-        document.addEventListener('mousemove',(e)=>{mx=(e.clientX/window.innerWidth-0.5)*2;my=(e.clientY/window.innerHeight-0.5)*2;});
-        
-        function animate3D(){
-            requestAnimationFrame(animate3D);
-            const t=Date.now()*0.001;
-            scene.children.forEach(o=>{if(o.userData&&o.userData.fs){o.rotation.x+=o.userData.rx||0;o.rotation.y+=o.userData.ry||0;o.rotation.z+=o.userData.rz||0;if(o.userData.iy!==undefined)o.position.y=o.userData.iy+Math.sin(t*o.userData.fs+o.userData.ph)*o.userData.fa;}});
-            st.rotation.x+=0.00005;st.rotation.y+=0.0001;
-            camera.position.x+=(mx*3-camera.position.x)*0.02;camera.position.y+=(-my*2-camera.position.y)*0.02;camera.lookAt(0,0,0);
-            l1.position.x=Math.sin(t*0.3)*10;l1.position.y=Math.cos(t*0.25)*10;
-            l2.position.x=Math.cos(t*0.35)*-8;l2.position.y=Math.sin(t*0.3)*-8;
-            renderer.render(scene,camera);
-        }
-        animate3D();
-        
-        // Matrix Rain
-        const mxCanvas=document.getElementById('matrixCanvas');mxCanvas.width=window.innerWidth;mxCanvas.height=window.innerHeight;
-        const mctx=mxCanvas.getContext('2d');
-        const chars='01アイウエオカキクケコABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const fontSize=14;const columns=Math.floor(mxCanvas.width/fontSize);
-        const drops=Array(columns).fill(1);
-        function drawMatrix(){mctx.fillStyle='rgba(0,0,0,0.05)';mctx.fillRect(0,0,mxCanvas.width,mxCanvas.height);mctx.fillStyle='#ff69b4';mctx.font=fontSize+'px monospace';for(let i=0;i<drops.length;i++){const text=chars[Math.floor(Math.random()*chars.length)];mctx.fillText(text,i*fontSize,drops[i]*fontSize);if(drops[i]*fontSize>mxCanvas.height&&Math.random()>0.975)drops[i]=0;drops[i]++;}requestAnimationFrame(drawMatrix);}
-        drawMatrix();
-        
-        // Cursor
-        const tc=document.getElementById('termCursor');
-        document.addEventListener('mousemove',(e)=>{tc.style.left=e.clientX-5+'px';tc.style.top=e.clientY-10+'px';});
-        
-        // Music
-        const audio=document.getElementById('bgMusic');const mt=document.getElementById('musicToggle');const vd=document.getElementById('vinylDisc');
-        if(audio&&mt){let p=true;mt.addEventListener('click',()=>{if(p){audio.pause();mt.innerHTML='<i class="fas fa-play"></i>';vd.classList.remove('playing');}else{audio.muted=false;audio.play();mt.innerHTML='<i class="fas fa-pause"></i>';vd.classList.add('playing');}p=!p;});}
-        (function(){if(!audio)return;let u=false;function um(){if(!u&&audio){audio.muted=false;audio.play().then(()=>{u=true;vd.classList.add('playing');mt.innerHTML='<i class="fas fa-pause"></i>';}).catch(()=>{});}}['click','touchstart','scroll','keydown'].forEach(e=>document.addEventListener(e,um,{once:true}));setTimeout(()=>{if(!u){audio.muted=false;audio.play();vd.classList.add('playing');mt.innerHTML='<i class="fas fa-pause"></i>';}},3000);})();
-        
-        // Scene transitions
-        setTimeout(()=>{
-            document.getElementById('heroReveal').style.display='block';
-            document.getElementById('continueBtn').style.display='inline-block';
-            document.getElementById('terminalBox').style.opacity='0.35';
-        },4000);
-        
-        function showTimeline(){
-            document.getElementById('heroSection').scrollIntoView({behavior:'smooth'});
-            setTimeout(()=>{
-                document.getElementById('timelineSection').style.display='block';
-                document.getElementById('timelineSection').scrollIntoView({behavior:'smooth'});
-                setTimeout(()=>{document.querySelectorAll('.tl-item').forEach((item,i)=>{setTimeout(()=>item.classList.add('visible'),i*500);});},500);
-            },300);
-        }
-        
-        function showProposal(){
-            document.getElementById('overlay').style.display='block';
-            document.getElementById('proposalCard').style.display='block';
-        }
-        
-        let noCount=0;
-        const guilt=['😭 SAI PLEASE...','💔 HEART CRASHING...','🥺 DON'T DO THIS...','😿 BINARY TEARS...','💀 LOVE_ERROR','🙏 ONE CHANCE SAI?'];
-        function moveNo(){
-            const btn=document.getElementById('noBtn');const card=document.getElementById('proposalCard');
-            const cr=card.getBoundingClientRect();const br=btn.getBoundingClientRect();
-            const maxX=cr.width-br.width-20;const maxY=cr.height-br.height-20;
-            const scale=Math.max(0.3,1-(noCount*0.05));
-            btn.style.position='absolute';btn.style.left=Math.random()*maxX+'px';btn.style.top=Math.random()*maxY+'px';
-            btn.style.transform=`scale(${scale})`;noCount++;
-            btn.textContent=guilt[noCount%guilt.length];
-            if(noCount>12){btn.textContent='OKAY FINE... I GIVE UP 😔';btn.style.opacity='0.4';btn.style.pointerEvents='none';}
-        }
-        
-        async function heSaidYes(){
-            document.getElementById('overlay').style.display='none';
-            document.getElementById('proposalCard').style.display='none';
-            
-            for(let i=0;i<15;i++){setTimeout(()=>createFirework(Math.random()*window.innerWidth,Math.random()*window.innerHeight*0.6),i*300);}
-            for(let i=0;i<60;i++){setTimeout(()=>{const h=document.createElement('div');h.style.cssText=`position:fixed;top:-50px;left:${Math.random()*100}vw;font-size:${Math.random()*20+15}px;z-index:50;animation:fall ${Math.random()*3+3}s linear forwards;pointer-events:none;`;h.textContent=['❤️','💕','💖','✨','💍'][Math.floor(Math.random()*5)];document.body.appendChild(h);setTimeout(()=>h.remove(),5000);},i*60);}
-            
-            const c=document.createElement('div');c.className='celebration';
-            c.innerHTML=`<div class="big-heart" style="font-size:6em;">💖</div><h1>SAI SAID YES! 🎉</h1><p style="font-size:1.6em;font-family:'Dancing Script',cursive;color:#fff;">Anandi ❤️ Sai</p><p style="font-family:'Fira Code',monospace;color:var(--hacker-green);">STATUS: TOGETHER FOREVER 💍</p><div style="margin-top:20px;padding:18px;background:rgba(0,0,0,0.5);border-radius:15px;text-align:left;border-left:3px solid var(--love-pink);"><p style="font-family:'Dancing Script',cursive;font-size:1.4em;color:var(--love-pink);">My Dearest Sai,</p><p id="finalLetter" style="line-height:1.8;color:#ddd;"></p></div>`;
-            document.body.appendChild(c);
-            
-            const txt='From the very first moment my eyes met yours, my heart knew it had found its forever home. You are the most beautiful chapter of my life. Thank you for saying YES and making me the happiest girl alive. I promise to be your best friend, your biggest supporter, and your forever love... today, tomorrow, and always.\n\nForever Yours,\nAnandi 💖';
-            const el=document.getElementById('finalLetter');let i=0;
-            function type(){if(i<txt.length){el.textContent+=txt[i];i++;setTimeout(type,30);}else{el.style.borderRight='none';}}
-            setTimeout(type,1000);
-        }
-        
-        function createFirework(x,y){
-            const colors=['#ff69b4','#ffd700','#ff1493','#00ffff','#ff4500'];
-            for(let i=0;i<60;i++){
-                const p=document.createElement('div');
-                const angle=(Math.PI*2/60)*i;
-                const vel=Math.random()*200+100;
-                p.style.cssText=`position:fixed;width:5px;height:5px;border-radius:50%;background:${colors[Math.floor(Math.random()*colors.length)]};left:${x}px;top:${y}px;z-index:55;pointer-events:none;box-shadow:0 0 8px currentColor;animation:burst ${1+Math.random()}s ease-out forwards;--vx:${Math.cos(angle)*vel}px;--vy:${Math.sin(angle)*vel}px;`;
-                document.body.appendChild(p);
-                setTimeout(()=>p.remove(),2000);
+        // ==================== MUSIC ====================
+        const audio = document.getElementById('bgMusic');
+        const musicToggle = document.getElementById('musicToggle');
+        const musicPlayer = document.getElementById('musicPlayer');
+
+        // Start playing on first user interaction
+        function startMusic() {
+            if (audio.paused) {
+                audio.play().then(() => {
+                    musicPlayer.classList.add('music-playing');
+                    musicToggle.textContent = '⏸';
+                }).catch(() => {});
             }
         }
-        const fstyle=document.createElement('style');
-        fstyle.textContent='@keyframes burst{0%{transform:translate(0,0);opacity:1;}100%{transform:translate(var(--vx),var(--vy));opacity:0;}}@keyframes fall{from{transform:translateY(0) rotate(0deg);opacity:0.9;}to{transform:translateY(110vh) rotate(360deg);opacity:0;}}';
-        document.head.appendChild(fstyle);
-        
-        window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);mxCanvas.width=window.innerWidth;mxCanvas.height=window.innerHeight;});
+
+        musicToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (audio.paused) {
+                audio.play().then(() => {
+                    musicPlayer.classList.add('music-playing');
+                    musicToggle.textContent = '⏸';
+                }).catch(() => {});
+            } else {
+                audio.pause();
+                musicPlayer.classList.remove('music-playing');
+                musicToggle.textContent = '▶';
+            }
+        });
+
+        // Autoplay on first interaction
+        document.addEventListener('click', startMusic, { once: true });
+        document.addEventListener('scroll', startMusic, { once: true });
+
+        // ==================== SHOW HERO REVEAL ====================
+        setTimeout(() => {
+            const reveal = document.getElementById('heroReveal');
+            if (reveal) {
+                reveal.classList.add('show');
+            }
+        }, 4000);
+
+        // ==================== GO TO TIMELINE ====================
+        function goToTimeline() {
+            document.getElementById('sec1').classList.remove('active');
+            document.getElementById('sec2').classList.add('active');
+            document.getElementById('sec2').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ==================== SHOW PROPOSAL ====================
+        function showProposal() {
+            document.getElementById('proposalOverlay').classList.add('show');
+        }
+
+        // ==================== NO BUTTON ====================
+        let noCount = 0;
+        const guiltMessages = [
+            '😭 SAI PLEASE...',
+            '💔 HEART CRASHING...',
+            '🥺 THINK AGAIN...',
+            '😿 DON\'T DO THIS...',
+            '💀 LOVE_ERROR',
+            '🙏 ONE CHANCE?',
+            '😭 ANANDI WILL CRY...',
+            '💔 SYSTEM FAILING...',
+        ];
+
+        function moveNoBtn() {
+            const btn = document.getElementById('noBtn');
+            const card = document.querySelector('.proposal-card');
+            const cardRect = card.getBoundingClientRect();
+            const btnRect = btn.getBoundingClientRect();
+
+            const maxX = cardRect.width - btnRect.width - 20;
+            const maxY = cardRect.height - btnRect.height - 20;
+
+            btn.style.position = 'absolute';
+            btn.style.left = Math.random() * maxX + 'px';
+            btn.style.top = Math.random() * maxY + 'px';
+            btn.style.transform = `scale(${Math.max(0.3, 1 - noCount * 0.06)})`;
+
+            noCount++;
+            btn.textContent = guiltMessages[noCount % guiltMessages.length];
+
+            if (noCount > 12) {
+                btn.textContent = 'OKAY I GIVE UP 😔';
+                btn.style.opacity = '0.4';
+                btn.style.pointerEvents = 'none';
+            }
+        }
+
+        // ==================== SHE SAID YES ====================
+        function heSaidYes() {
+            // Hide overlay
+            document.getElementById('proposalOverlay').classList.remove('show');
+
+            // Fireworks
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    createFirework(Math.random() * window.innerWidth, Math.random() * window.innerHeight * 0.6);
+                }, i * 250);
+            }
+
+            // Heart rain
+            for (let i = 0; i < 70; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'heart-rain';
+                    heart.textContent = ['💖', '💕', '💝', '✨', '💍'][Math.floor(Math.random() * 5)];
+                    heart.style.left = Math.random() * 100 + 'vw';
+                    heart.style.fontSize = (Math.random() * 25 + 15) + 'px';
+                    heart.style.top = '-50px';
+                    heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                    document.body.appendChild(heart);
+                    setTimeout(() => heart.remove(), 5000);
+                }, i * 70);
+            }
+
+            // Celebration card
+            setTimeout(() => {
+                const celeb = document.createElement('div');
+                celeb.className = 'celeb-card';
+                celeb.innerHTML = `
+                    <div class="big-heart" style="font-size:6em;">💖</div>
+                    <h1>SAI SAID YES! 🎉</h1>
+                    <p style="font-size:1.5em;font-family:'Dancing Script',cursive;color:#fff;">Anandi ❤️ Sai</p>
+                    <p style="font-family:'Fira Code',monospace;color:#00ff41;margin:10px 0;">STATUS: TOGETHER FOREVER 💍</p>
+                    <div style="margin-top:15px;padding:15px;background:rgba(0,0,0,0.5);border-radius:10px;text-align:left;border-left:3px solid #ff69b4;">
+                        <p style="font-family:'Dancing Script',cursive;font-size:1.3em;color:#ff69b4;">My Dearest Sai,</p>
+                        <p id="finalText" style="line-height:1.7;color:#ddd;font-size:0.9rem;"></p>
+                    </div>
+                `;
+                document.body.appendChild(celeb);
+
+                // Typewriter for final letter
+                const finalMsg = "From the very first moment my eyes met yours, my heart knew it had found its forever home. You are the most beautiful chapter of my life. Thank you for saying YES and making me the happiest girl alive. I promise to be your best friend, your biggest supporter, and your forever love... today, tomorrow, and always.\n\nForever Yours,\nAnandi 💖";
+                const el = document.getElementById('finalText');
+                let idx = 0;
+                function typeLetter() {
+                    if (idx < finalMsg.length) {
+                        el.textContent += finalMsg[idx];
+                        idx++;
+                        setTimeout(typeLetter, 30);
+                    }
+                }
+                typeLetter();
+            }, 1000);
+        }
+
+        function createFirework(x, y) {
+            const colors = ['#ff69b4', '#ffd700', '#ff1493', '#00ffff', '#ff4500', '#ffb7b2'];
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'firework';
+                const angle = (Math.PI * 2 / 50) * i;
+                const velocity = Math.random() * 180 + 80;
+                particle.style.cssText = `
+                    left: ${x}px; top: ${y}px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    --dx: ${Math.cos(angle) * velocity}px;
+                    --dy: ${Math.sin(angle) * velocity}px;
+                    box-shadow: 0 0 8px currentColor;
+                `;
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 2000);
+            }
+        }
     </script>
 </body>
 </html>
